@@ -44,7 +44,7 @@
         // Load the GLTF model
         const loader = new THREE.GLTFLoader();
         loader.load(
-            'Cube.gltf', // Replace with the path to your GLTF file in the repository
+            './Cube.gltf', // Replace with the path to your GLTF file in the repository
             (gltf) => {
                 scene.add(gltf.scene); // Add the loaded model to the scene
             },
