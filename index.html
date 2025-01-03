@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Viewer</title>
-    <!-- Include Three.js and GLTFLoader -->
+    <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/OrbitControls.js"></script>
+    <!-- Include OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <!-- Include GLTFLoader -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         body {
@@ -27,21 +29,22 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Add orbit controls for interaction
+        // Add OrbitControls for interaction
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Strong ambient light
         scene.add(ambientLight);
+
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(1, 1, 1).normalize();
+        directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
         // Load the GLTF model
         const loader = new THREE.GLTFLoader();
         loader.load(
-            'Cube.gltf', // This is the path to your model in the repository
+            'Cube.gltf', // Replace with the path to your GLTF file in the repository
             (gltf) => {
                 scene.add(gltf.scene); // Add the loaded model to the scene
             },
@@ -53,6 +56,7 @@
 
         // Set the camera position
         camera.position.set(0, 2, 5);
+        camera.lookAt(0, 0, 0);
 
         // Render the scene
         function animate() {
