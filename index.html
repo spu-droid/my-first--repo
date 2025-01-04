@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer with Sea Texture</title>
+    <title>3D Viewer with Moving Sea Texture</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Include OrbitControls -->
@@ -63,9 +63,14 @@
         camera.position.set(5, 5, 5);
         camera.lookAt(0, 0, 0);
 
-        // Render the scene
+        // Render the scene and animate the sea texture
         function animate() {
             requestAnimationFrame(animate);
+
+            // Animate the sea texture
+            seaTexture.offset.x += 0.01; // Move horizontally
+            seaTexture.offset.y += 0.005; // Move vertically
+
             controls.update();
             renderer.render(scene, camera);
         }
