@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer with Moving Sea Texture</title>
+    <title>Ocean Scene with Sky</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Include OrbitControls -->
@@ -31,52 +31,47 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Strong ambient light
+        // Set up lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        // Create the plane with the sea texture
+        // Load the ocean texture
         const textureLoader = new THREE.TextureLoader();
-        const seaTexture = textureLoader.load('./sea_1.png'); // Load the sea texture
-        seaTexture.wrapS = THREE.RepeatWrapping;
-        seaTexture.wrapT = THREE.RepeatWrapping;
-        seaTexture.repeat.set(10, 10); // Adjust tiling for larger ground coverage
+        const oceanTexture = textureLoader.load('./sea_1.png'); // Replace with your ocean texture
+        const oceanGeometry = new THREE.PlaneGeometry(50, 50);
+        const oceanMaterial = new THREE.MeshStandardMaterial({ map: oceanTexture });
+        const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
+        ocean.rotation.x = -Math.PI / 2; // Rotate the plane to make it horizontal
+        scene.add(ocean);
 
-        const planeGeometry = new THREE.PlaneGeometry(20, 20);
-        const planeMaterial = new THREE.MeshStandardMaterial({ map: seaTexture });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -Math.PI / 2; // Rotate to lay flat
-        scene.add(plane);
+        // Load the sky texture and set it as the scene background
+        const skyTexture = textureLoader.load('./sky_1.jpeg'); // Replace with your sky texture
+        scene.background = skyTexture;
 
-        // Add a cube above the sea plane
+        // Add a simple cube to represent the house or object
         const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
         const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.position.y = 0.5; // Raise the cube above the plane
+        cube.position.y = 0.5; // Position the cube above the ocean
         scene.add(cube);
 
-        // Set the camera position
-        camera.position.set(5, 5, 5);
+        // Position the camera
+        camera.position.set(0, 3, 5);
         camera.lookAt(0, 0, 0);
 
-        // Render the scene and animate the sea texture
+        // Animate the scene
         function animate() {
             requestAnimationFrame(animate);
-
-            // Slow down the texture animation
-            seaTexture.offset.x += 0.002; // Slower horizontal movement
-            seaTexture.offset.y += 0.001; // Slower vertical movement
-
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
 
-        // Adjust the canvas size when the window is resized
+        // Adjust canvas size on window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
