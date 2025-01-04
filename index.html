@@ -84,7 +84,7 @@
             (gltf) => {
                 const model = gltf.scene;
                 model.position.set(0, 0.5, 0); // Adjust position if needed
-                model.rotation.x = Math.PI; // Rotate around the X-axis
+                model.rotation.x = 2 * Math.PI; // Rotate around the X-axis
 				model.rotation.y = 0;          // No rotation on Y-axis
 				model.rotation.z = 0;          // No rotation on Z-axis
                 scene.add(model);
