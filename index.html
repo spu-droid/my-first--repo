@@ -11,14 +11,14 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: black; /* Keep background black */
+            background-color: black; /* Black background */
         }
 
         #intro {
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
+            flex-direction: row; /* Horizontal layout */
             background-color: black;
             color: white;
             font-family: 'Didot', serif;
@@ -34,35 +34,12 @@
 
         .word {
             opacity: 0;
+            margin: 0 10px; /* Add space between words */
             transition: opacity 1s ease;
         }
 
         canvas {
             display: block;
-        }
-
-        #title {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: calc(20px + 1vw);
-            color: orange;
-            font-family: 'Didot', serif;
-            z-index: 1000;
-            text-align: center;
-        }
-
-        #footer-text {
-            position: absolute;
-            bottom: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: calc(14px + 0.8vw);
-            color: rgba(255, 255, 255, 0.5);
-            font-family: 'Didot', serif;
-            z-index: 1000;
-            text-align: center;
         }
     </style>
 </head>
@@ -83,25 +60,20 @@
         <div class="word">behind</div>
         <div class="word">Rose</div>
         <div class="word">Island?</div>
-        <div class="word" style="margin-top: 20px;">Well,</div>
+        <div class="word">Well,</div>
         <div class="word">here</div>
         <div class="word">is</div>
         <div class="word">one</div>
         <div class="word">for</div>
         <div class="word">you.</div>
     </div>
-    <div id="title" style="display: none;">ANNA'S ISLAND</div>
-    <div id="footer-text" style="display: none;">buon compleanno, maus</div>
 
     <script>
         const intro = document.getElementById('intro');
-        const title = document.getElementById('title');
-        const footerText = document.getElementById('footer-text');
         const words = document.querySelectorAll('.word');
-
         let loaded = false;
 
-        // Animate intro words with pauses
+        // Animate intro words horizontally
         function animateWords() {
             let delay = 0;
             words.forEach((word, index) => {
@@ -124,9 +96,17 @@
             setTimeout(() => {
                 intro.style.display = 'none'; // Hide intro completely after fade out
                 if (loaded) {
-                    startIslandScene();
+                    showBlackScreen();
                 }
             }, 1500);
+        }
+
+        // Show black screen briefly before starting the scene
+        function showBlackScreen() {
+            document.body.style.backgroundColor = 'black';
+            setTimeout(() => {
+                startIslandScene();
+            }, 1000); // 1-second black screen
         }
 
         // Preload model and assets
@@ -160,27 +140,37 @@
 
             // OrbitControls setup
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-            controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees (in radians)
-            controls.maxPolarAngle = (3 * Math.PI) / 7; // Maximum angle: 90 degrees (above the plane)
-
-            controls.minDistance = 5; // Minimum zoom distance
-            controls.maxDistance = 25; // Maximum zoom distance
-            controls.enableDamping = true; // Enable damping for smooth controls
+            controls.enableDamping = true;
 
             // Lighting setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Reduced intensity
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4); // Reduced intensity
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            // Load the GLTF model
+            // Skybox setup
+            const loader = new THREE.CubeTextureLoader();
+            const texture = loader.load([
+                './sky_px.jpg', './sky_nx.jpg', // Right and Left
+                './sky_py.jpg', './sky_ny.jpg', // Top and Bottom
+                './sky_pz.jpg', './sky_nz.jpg'  // Front and Back
+            ]);
+            scene.background = texture;
+
+            // Add water (sea)
+            const waterGeometry = new THREE.PlaneGeometry(100, 100);
+            const waterMaterial = new THREE.MeshPhongMaterial({ color: 0x1ca3ec, shininess: 80 });
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2; // Lay flat
+            scene.add(water);
+
+            // Load the island model
             preloadAssets((gltf) => {
                 const model = gltf.scene;
                 model.position.set(0, 0, 0); // Adjust position if needed
-                model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
+                model.scale.set(0.5, 0.5, 0.5); // Scale down
                 scene.add(model);
 
                 // Start rendering
