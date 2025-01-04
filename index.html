@@ -71,6 +71,7 @@
         <div class="word">Remember</div>
         <div class="word">how</div>
         <div class="word">you</div>
+        <div class="word">once</div>
         <div class="word">told</div>
         <div class="word">me</div>
         <div class="word">how</div>
@@ -81,9 +82,10 @@
         <div class="word">idea</div>
         <div class="word">behind</div>
         <div class="word">Rose</div>
-        <div class="word">Island,</div>
-        <div class="word">well</div>
-        <div class="word">here's</div>
+        <div class="word">Island?</div>
+        <div class="word" style="margin-top: 20px;">Well,</div>
+        <div class="word">here</div>
+        <div class="word">is</div>
         <div class="word">one</div>
         <div class="word">for</div>
         <div class="word">you.</div>
@@ -99,12 +101,18 @@
 
         let loaded = false;
 
-        // Animate intro words
+        // Animate intro words with pauses
         function animateWords() {
+            let delay = 0;
             words.forEach((word, index) => {
                 setTimeout(() => {
                     word.style.opacity = 1;
-                }, index * 500); // Delay each word by 500ms
+
+                    // Add pauses for specific words
+                    if (index === 14) delay += 1000; // Pause after "Island?"
+                    if (index === 15) delay += 1000; // Pause after "Well,"
+                }, delay);
+                delay += 500; // Standard delay for each word
             });
         }
 
