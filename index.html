@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Scene with Sky</title>
+    <title>Ocean Scene with Gradient Sky</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Include OrbitControls -->
@@ -12,6 +12,7 @@
         body {
             margin: 0;
             overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #ffffff); /* Sky blue to white gradient */
         }
         canvas {
             display: block;
@@ -47,10 +48,6 @@
         const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
         ocean.rotation.x = -Math.PI / 2; // Rotate the plane to make it horizontal
         scene.add(ocean);
-
-        // Load the sky texture and set it as the scene background
-        const skyTexture = textureLoader.load('./sky_1.jpeg'); // Replace with your sky texture
-        scene.background = skyTexture;
 
         // Add a simple cube to represent the house or object
         const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
