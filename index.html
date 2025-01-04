@@ -11,10 +11,11 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: black;
             font-family: 'Didot', serif;
         }
 
-        #intro {
+        #text-container {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -27,11 +28,9 @@
             left: 0;
             width: 100%;
             height: 100%;
+            opacity: 0;
             z-index: 1000;
-        }
-
-        canvas {
-            display: block;
+            transition: opacity 1.5s ease;
         }
 
         #title {
@@ -57,26 +56,58 @@
             z-index: 1000;
             text-align: center;
         }
+
+        canvas {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div id="intro">
-        Remember how you told me how much you liked the idea behind Rose Island, well here's one for you.
-    </div>
+    <div id="text-container"></div>
     <div id="title" style="display: none;">ANNA'S ISLAND</div>
     <div id="footer-text" style="display: none;">buon compleanno, maus</div>
 
     <script>
-        const intro = document.getElementById('intro');
+        const textContainer = document.getElementById('text-container');
         const title = document.getElementById('title');
         const footerText = document.getElementById('footer-text');
 
-        intro.addEventListener('click', () => {
-            intro.style.display = 'none'; // Hide the intro text
-            title.style.display = 'block'; // Show the island title
-            footerText.style.display = 'block'; // Show the footer text
-            setTimeout(startIslandScene, 100); // Add a small delay before starting the 3D scene
-        });
+        // Text sequences
+        const texts = [
+            "Remember how you told me how much you like the idea behind Rose Island?",
+            "Well, here is one for you."
+        ];
+
+        let currentTextIndex = 0;
+
+        // Show black screen for 2 seconds, then start animations
+        setTimeout(() => {
+            fadeInText(texts[currentTextIndex], () => {
+                setTimeout(() => {
+                    fadeOutText(() => {
+                        currentTextIndex++;
+                        if (currentTextIndex < texts.length) {
+                            fadeInText(texts[currentTextIndex], () => {
+                                setTimeout(() => {
+                                    fadeOutText(startIslandScene);
+                                }, 2000); // Wait before fading out second text
+                            });
+                        }
+                    });
+                }, 2000); // Wait before fading out first text
+            });
+        }, 2000); // Initial black screen duration
+
+        function fadeInText(text, callback) {
+            textContainer.innerText = text;
+            textContainer.style.opacity = 1;
+            setTimeout(callback, 1500); // Wait for fade-in to complete
+        }
+
+        function fadeOutText(callback) {
+            textContainer.style.opacity = 0;
+            setTimeout(callback, 1500); // Wait for fade-out to complete
+        }
 
         function preloadAssets(callback) {
             const textureLoader = new THREE.TextureLoader();
@@ -100,6 +131,8 @@
         }
 
         function startIslandScene() {
+            textContainer.style.display = 'none'; // Hide text container
+
             preloadAssets(([waterTexture, gltf]) => {
                 // Scene setup
                 const scene = new THREE.Scene();
@@ -170,45 +203,20 @@
                 const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
                 const waterGeometry = new THREE.PlaneGeometry(100, 100);
 
-                // Create a tiled water surface
-                const tileSize = 100;
-                const tiles = 5; // Number of tiles in one direction
-                for (let x = -tiles / 2; x < tiles / 2; x++) {
-                    for (let z = -tiles / 2; z < tiles / 2; z++) {
-                        const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
-                        waterTile.position.set(x * tileSize, 0, z * tileSize);
-                        waterTile.rotation.x = -Math.PI / 2;
-                        scene.add(waterTile);
-                    }
-                }
+                const water = new THREE.Mesh(waterGeometry, waterMaterial);
+                water.rotation.x = -Math.PI / 2;
+                scene.add(water);
 
-                // Move water texture slowly
-                let waterOffset = 0;
-                function moveWater() {
-                    waterOffset += 0.001; // Slow speed
-                    waterTexture.offset.y = waterOffset;
-                }
-
-                // Load the GLTF model and adjust its material
+                // Load the GLTF model
                 const model = gltf.scene;
-                model.position.set(0, 0, 0); // Adjust position if needed
-                model.rotation.x = (3 * Math.PI) / 2; // Rotate around the X-axis
-                model.rotation.z = Math.PI; // Adjust rotation
-                model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material.color.set(0xCACBCB); // Set gray color (#CACBCB)
-                        child.material.roughness = 0.8; // Make less reflective
-                        child.material.metalness = 0.1; // Reduce metallic appearance
-                    }
-                });
+                model.position.set(0, 0, 0);
+                model.scale.set(0.5, 0.5, 0.5);
                 scene.add(model);
 
                 // Render loop
                 function animate() {
                     requestAnimationFrame(animate);
                     controls.update();
-                    moveWater(); // Ensure water moves
                     gradientMaterial.uniforms.time.value += 0.01; // Update gradient animation
                     renderer.render(scene, camera);
                 }
@@ -225,3 +233,4 @@
     </script>
 </body>
 </html>
+
