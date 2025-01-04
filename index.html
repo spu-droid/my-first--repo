@@ -51,7 +51,7 @@
             bottom: 5%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: calc(16px + 0.8vw);
+            font-size: calc(14px + 0.8vw);
             color: rgba(255, 255, 255, 0.5);
             font-family: 'Didot', serif;
             z-index: 1000;
@@ -61,7 +61,7 @@
 </head>
 <body>
     <div id="intro">
-        I remember you once told me how romantic it was that a man created an island for the woman he loved. So, I decided to create one just for you.
+        Remember how you told me how much you liked the idea behind Rose Island, well here's one for you.
     </div>
     <div id="title" style="display: none;">ANNA'S ISLAND</div>
     <div id="footer-text" style="display: none;">buon compleanno, maus</div>
@@ -94,7 +94,7 @@
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
             controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees (in radians)
-            controls.maxPolarAngle = Math.PI / 2; // Maximum angle: 90 degrees (above the plane)
+            controls.maxPolarAngle = Math.PI / 3; // Maximum angle: 90 degrees (above the plane)
 
             controls.minDistance = 5; // Minimum zoom distance
             controls.maxDistance = 25; // Maximum zoom distance
