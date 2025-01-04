@@ -28,7 +28,7 @@
         }
         #footer-text {
             position: absolute;
-            bottom: 2%; /* Adjust spacing from the bottom */
+            bottom: 3%; /* Adjust spacing from the bottom */
             left: 50%;
             transform: translateX(-50%);
             font-size: calc(14px + 0.8vw); /* Responsive font size */
@@ -58,7 +58,7 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
         controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees (in radians)
-        controls.maxPolarAngle = Math.PI / 2; // Maximum angle: 90 degrees (above the plane)
+        controls.maxPolarAngle = (3 * Math.PI) / 5; // Maximum angle: 90 degrees (above the plane)
 
         controls.minDistance = 5; // Minimum zoom distance
         controls.maxDistance = 25; // Maximum zoom distance
