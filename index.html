@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brick Texture Example</title>
+    <title>3D Viewer</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Include OrbitControls -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <style>
         body {
             margin: 0;
@@ -27,44 +25,39 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Add OrbitControls for interaction
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6); // Directional light
-        directionalLight.position.set(5, 5, 5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        directionalLight.position.set(5, 10, 7.5);
         scene.add(directionalLight);
 
-        // Load the brick texture
+        // Load the texture
         const textureLoader = new THREE.TextureLoader();
-        const brickTexture = textureLoader.load('./brick_texture.png'); // Path to your brick texture file
+        const brickTexture = textureLoader.load('./brick_texture.png');
 
-        // Create a material using the brick texture
-        const brickMaterial = new THREE.MeshStandardMaterial({
-            map: brickTexture, // Apply the texture
-            roughness: 0.8 // Adjust roughness for shininess
-        });
+        // Create the ground
+        const planeGeometry = new THREE.PlaneGeometry(50, 50); // Ground size
+        const planeMaterial = new THREE.MeshStandardMaterial({ map: brickTexture });
+        const ground = new THREE.Mesh(planeGeometry, planeMaterial);
+        ground.rotation.x = -Math.PI / 2; // Rotate to lie flat
+        scene.add(ground);
 
-        // Create a cube geometry with the brick material
-        const cubeGeometry = new THREE.BoxGeometry(1, 1, 1); // Width, height, depth
-        const brickCube = new THREE.Mesh(cubeGeometry, brickMaterial);
-        scene.add(brickCube);
-
-        // Position the cube so it's visible
-        brickCube.position.set(0, 0.5, 0); // Adjust as needed
+        // Create the cube
+        const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+        const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.position.set(0, 1, 0); // Place the cube on the ground
+        scene.add(cube);
 
         // Set the camera position
-        camera.position.set(2, 2, 5);
+        camera.position.set(0, 10, 20);
         camera.lookAt(0, 0, 0);
 
         // Render the scene
         function animate() {
             requestAnimationFrame(animate);
-            controls.update();
             renderer.render(scene, camera);
         }
         animate();
