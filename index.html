@@ -10,7 +10,6 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #FA8072; /* Replace with the color of the uploaded image */
         }
 
         canvas {
@@ -22,6 +21,9 @@
     <script>
         // Scene setup
         const scene = new THREE.Scene();
+
+        // Set the background color
+        scene.background = new THREE.Color(0xF08080); // Light Coral (#F08080)
 
         // Camera setup
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -89,5 +91,3 @@
     </script>
 </body>
 </html>
-
-
