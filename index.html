@@ -35,6 +35,8 @@
         // OrbitControls setup
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
+        controls.minPolarAngle = Math.PI / 4; // Prevent camera from going below the plane (45 degrees)
+        controls.maxPolarAngle = Math.PI / 2; // Limit maximum upward angle (90 degrees)
 
         // Lighting setup
         const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -130,11 +132,11 @@
         // Animate water movement
         let offset = 0;
         function animate() {
-            offset += 0.001; // Slower water movement
+            offset += 0.001; // Keep water movement speed consistent
             waterTexture.offset.set(offset, offset);
 
             // Update gradient time
-            gradientMaterial.uniforms.time.value += 0.01; // Slower gradient transitions
+            gradientMaterial.uniforms.time.value += 0.01; // Gradient transitions remain smooth
 
             controls.update();
             renderer.render(scene, camera);
