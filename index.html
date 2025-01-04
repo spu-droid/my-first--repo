@@ -70,14 +70,14 @@
         const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
         scene.add(gradientMesh);
 
-        // Water plane
+        // Extended water plane
         const waterTexture = new THREE.TextureLoader().load('sea_1.png');
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
-        waterTexture.repeat.set(10, 10);
+        waterTexture.repeat.set(20, 20); // Increased tiling for a larger surface
 
         const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
-        const waterGeometry = new THREE.PlaneGeometry(100, 100);
+        const waterGeometry = new THREE.PlaneGeometry(200, 200); // Larger water plane
         const water = new THREE.Mesh(waterGeometry, waterMaterial);
         water.rotation.x = -Math.PI / 2;
         scene.add(water);
@@ -98,6 +98,12 @@
                 model.position.set(0, 0, 0); // Adjust position if needed
                 model.rotation.x = (3 * Math.PI) / 2; // Rotate around the X-axis
                 model.rotation.z = Math.PI; // Adjust rotation
+                model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.color.set(0xCACBCB); // Set gray color (#CACBCB)
+                    }
+                });
                 scene.add(model);
             },
             undefined,
@@ -124,4 +130,3 @@
     </script>
 </body>
 </html>
-
