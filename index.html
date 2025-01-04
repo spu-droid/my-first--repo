@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer with Gradient Background</title>
+    <title>3D Viewer with Dynamic Gradient Background</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
@@ -52,10 +52,12 @@
             }
         `;
         const fragmentShader = `
+            uniform float time;
             varying vec2 vUv;
+
             void main() {
-                vec3 color1 = vec3(0.94, 0.5, 0.5); // Light Coral (#F08080)
-                vec3 color2 = vec3(0.53, 0.81, 0.92); // Sky Blue (#87CEEB)
+                vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5); // Night to Light Coral
+                vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5); // Night to Sky Blue
                 gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
             }
         `;
@@ -63,6 +65,9 @@
         const gradientMaterial = new THREE.ShaderMaterial({
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
+            uniforms: {
+                time: { value: 0 } // Pass time as a uniform
+            },
             side: THREE.BackSide
         });
 
@@ -74,10 +79,10 @@
         const waterTexture = new THREE.TextureLoader().load('sea_1.png');
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
-        waterTexture.repeat.set(20, 20); // Increased tiling for a larger surface
+        waterTexture.repeat.set(20, 20); // Larger water tiling for a bigger surface
 
         const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
-        const waterGeometry = new THREE.PlaneGeometry(200, 200); // Larger water plane
+        const waterGeometry = new THREE.PlaneGeometry(200, 200); // Extended water plane
         const water = new THREE.Mesh(waterGeometry, waterMaterial);
         water.rotation.x = -Math.PI / 2;
         scene.add(water);
@@ -119,6 +124,7 @@
             requestAnimationFrame(animate);
             controls.update();
             moveWater(); // Ensure water moves
+            gradientMaterial.uniforms.time.value += 0.01; // Update gradient animation
             renderer.render(scene, camera);
         }
         animate();
@@ -132,4 +138,3 @@
     </script>
 </body>
 </html>
-
