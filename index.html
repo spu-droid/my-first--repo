@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
     <!-- Include Water -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/objects/Water.js"></script>
+    <!-- Include CubeTextureLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/CubeTextureLoader.js"></script>
     <style>
         body {
             margin: 0;
@@ -39,18 +41,30 @@
         controls.maxDistance = 50; // Maximum zoom distance
 
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Strong ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Softer ambient light
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(10, 10, 10);
         scene.add(directionalLight);
+
+        // Add a skybox
+        const cubeTextureLoader = new THREE.CubeTextureLoader();
+        const skyboxTexture = cubeTextureLoader.load([
+            'https://threejs.org/examples/textures/cube/skybox/px.jpg', // Positive X
+            'https://threejs.org/examples/textures/cube/skybox/nx.jpg', // Negative X
+            'https://threejs.org/examples/textures/cube/skybox/py.jpg', // Positive Y
+            'https://threejs.org/examples/textures/cube/skybox/ny.jpg', // Negative Y
+            'https://threejs.org/examples/textures/cube/skybox/pz.jpg', // Positive Z
+            'https://threejs.org/examples/textures/cube/skybox/nz.jpg'  // Negative Z
+        ]);
+        scene.background = skyboxTexture;
 
         // Add moving water
         const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
         const water = new THREE.Water(waterGeometry, {
             color: '#001e0f',
-            scale: 2,
+            scale: 4,
             flowDirection: new THREE.Vector2(1, 1),
             textureWidth: 512,
             textureHeight: 512,
@@ -74,7 +88,7 @@
         );
 
         // Set the camera position
-        camera.position.set(0, 5, 10);
+        camera.position.set(0, 10, 30);
         camera.lookAt(0, 0, 0);
 
         // Animate the scene
