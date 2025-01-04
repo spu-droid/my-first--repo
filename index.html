@@ -26,10 +26,22 @@
             z-index: 1000; /* Ensure it appears above the canvas */
             text-align: center;
         }
+        #footer-text {
+            position: absolute;
+            bottom: 2%; /* Adjust spacing from the bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: calc(14px + 0.8vw); /* Responsive font size */
+            color: rgba(255, 255, 255, 0.5); /* White color with 50% transparency */
+            font-family: 'Didot', serif;
+            z-index: 1000; /* Ensure it appears above the canvas */
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="title">ANNA'S ISLAND</div>
+    <div id="footer-text">buon compleanno, maus</div>
     <script>
         // Scene setup
         const scene = new THREE.Scene();
