@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's island</title>
+    <title>Anna's Island</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Include OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <!-- Include GLTFLoader -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Include Water2 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/objects/Water2.js"></script>
     <style>
         body {
             margin: 0;
@@ -32,21 +34,38 @@
         // Add OrbitControls for interaction
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2; // Prevent going below sea level
+        controls.minDistance = 5; // Minimum zoom distance
+        controls.maxDistance = 50; // Maximum zoom distance
 
         // Add lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Strong ambient light
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 5, 5);
+        directionalLight.position.set(10, 10, 10);
         scene.add(directionalLight);
+
+        // Add moving water
+        const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const water = new THREE.Water2(waterGeometry, {
+            color: '#001e0f',
+            scale: 4,
+            flowDirection: new THREE.Vector2(1, 1),
+            textureWidth: 1024,
+            textureHeight: 1024,
+        });
+        water.rotation.x = -Math.PI / 2;
+        scene.add(water);
 
         // Load the GLTF model
         const loader = new THREE.GLTFLoader();
         loader.load(
-            './result.gltf', // Path to your renamed GLTF file
+            './result.gltf', // Path to your GLTF file
             (gltf) => {
-                scene.add(gltf.scene); // Add the loaded model to the scene
+                const model = gltf.scene;
+                model.position.y = 1; // Position the model above the water
+                scene.add(model);
             },
             undefined,
             (error) => {
@@ -55,12 +74,13 @@
         );
 
         // Set the camera position
-        camera.position.set(0, 2, 5);
+        camera.position.set(0, 10, 30);
         camera.lookAt(0, 0, 0);
 
-        // Render the scene
+        // Animate the scene
         function animate() {
             requestAnimationFrame(animate);
+            water.material.uniforms['time'].value += 1.0 / 60.0; // Animate water
             controls.update();
             renderer.render(scene, camera);
         }
