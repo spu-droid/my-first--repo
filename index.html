@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer</title>
+    <title>3D Viewer with Sea Texture</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Include OrbitControls -->
@@ -29,45 +29,44 @@
 
         // Add OrbitControls for interaction
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // Smooth transitions
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false; // Disables vertical panning
-        controls.maxPolarAngle = Math.PI / 2; // Prevents the camera from going below the ground
+        controls.enableDamping = true;
 
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Strong ambient light
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-        directionalLight.position.set(5, 10, 7.5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        // Load the texture
+        // Create the plane with the sea texture
         const textureLoader = new THREE.TextureLoader();
-        const brickTexture = textureLoader.load('./brick_texture.png');
+        const seaTexture = textureLoader.load('./sea_1.png'); // Load the sea texture
+        seaTexture.wrapS = THREE.RepeatWrapping;
+        seaTexture.wrapT = THREE.RepeatWrapping;
+        seaTexture.repeat.set(10, 10); // Adjust tiling for larger ground coverage
 
-        // Create the ground
-        const planeGeometry = new THREE.PlaneGeometry(50, 50); // Ground size
-        const planeMaterial = new THREE.MeshStandardMaterial({ map: brickTexture });
-        const ground = new THREE.Mesh(planeGeometry, planeMaterial);
-        ground.rotation.x = -Math.PI / 2; // Rotate to lie flat
-        scene.add(ground);
+        const planeGeometry = new THREE.PlaneGeometry(20, 20);
+        const planeMaterial = new THREE.MeshStandardMaterial({ map: seaTexture });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2; // Rotate to lay flat
+        scene.add(plane);
 
-        // Create the cube
-        const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+        // Add a cube above the sea plane
+        const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
         const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.position.set(0, 1, 0); // Place the cube on the ground
+        cube.position.y = 0.5; // Raise the cube above the plane
         scene.add(cube);
 
         // Set the camera position
-        camera.position.set(5, 10, 15);
+        camera.position.set(5, 5, 5);
         camera.lookAt(0, 0, 0);
 
         // Render the scene
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Update OrbitControls
+            controls.update();
             renderer.render(scene, camera);
         }
         animate();
