@@ -10,6 +10,8 @@
         body {
             margin: 0;
             overflow: hidden;
+            background: linear-gradient(to top, #FF7F50, #87CEEB); /* Gradient background */
+            height: 100vh;
         }
         canvas {
             display: block;
@@ -34,18 +36,15 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // Add sky background
-        const skyTexture = new THREE.TextureLoader().load('./sky_1.jpeg');
-        scene.background = skyTexture;
-
         // Create water material
-        const waterTexture = new THREE.TextureLoader().load('./sea_1.png');
+        const textureLoader = new THREE.TextureLoader();
+        const waterTexture = textureLoader.load('./sea_1.png'); // Water texture
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
         waterTexture.repeat.set(10, 10);
 
         // Animate water movement
-        let offset = 0;
+        let offsetX = 0, offsetY = 0;
         const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
         const waterPlane = new THREE.PlaneGeometry(50, 50);
         const waterMesh = new THREE.Mesh(waterPlane, waterMaterial);
@@ -71,9 +70,10 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Move water texture
-            offset += 0.01;
-            waterTexture.offset.set(offset, offset);
+            // Slow water movement
+            offsetX += 0.001; // Slow horizontal movement
+            offsetY += 0.0005; // Slow vertical movement
+            waterTexture.offset.set(offsetX, offsetY);
 
             controls.update();
             renderer.render(scene, camera);
