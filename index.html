@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Sky Gradient</title>
-    <!-- Include Three.js -->
+    <title>3D Viewer with Water and Dynamic Background</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Include OrbitControls -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         body {
             margin: 0;
@@ -23,129 +22,91 @@
         // Scene setup
         const scene = new THREE.Scene();
 
-        // Camera setup
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 10, 20);
+        // Set the background gradient
+        const gradientColors = [
+            new THREE.Color(0x000433), // Night blue
+            new THREE.Color(0xff9191), // Light pink
+            new THREE.Color(0x87d9ff), // Daytime blue
+            new THREE.Color(0xffad43), // Sunset orange
+            new THREE.Color(0xff5b5b), // Red
+            new THREE.Color(0x171fbf), // Deep blue
+        ];
+        let gradientIndex = 0;
+        let gradientStep = 0;
 
-        // Renderer setup
+        function updateBackgroundGradient() {
+            const nextIndex = (gradientIndex + 1) % gradientColors.length;
+            const currentColor = gradientColors[gradientIndex];
+            const nextColor = gradientColors[nextIndex];
+            const lerpedColor = currentColor.clone().lerp(nextColor, gradientStep);
+            scene.background = lerpedColor;
+            gradientStep += 0.002;
+            if (gradientStep >= 1) {
+                gradientStep = 0;
+                gradientIndex = nextIndex;
+            }
+        }
+
+        // Camera and renderer
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // OrbitControls setup
+        // OrbitControls
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.maxPolarAngle = Math.PI / 2; // Restrict vertical movement to above the plane
         controls.enableDamping = true;
-        controls.minPolarAngle = Math.PI / 4; // Prevent camera from going below the plane (45 degrees)
-        controls.maxPolarAngle = Math.PI / 2; // Limit maximum upward angle (90 degrees)
 
-        // Lighting setup
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-        scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 10, 5);
-        scene.add(directionalLight);
-
-        // Water surface (Plane with water texture)
-        const textureLoader = new THREE.TextureLoader();
-        const waterTexture = textureLoader.load('sea_1.png'); // Ensure texture is in the same folder
+        // Add water plane
+        const waterTexture = new THREE.TextureLoader().load('sea_1.png');
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
         waterTexture.repeat.set(10, 10);
 
-        const waterMaterial = new THREE.MeshStandardMaterial({ map: waterTexture });
+        const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
         const waterGeometry = new THREE.PlaneGeometry(100, 100);
         const water = new THREE.Mesh(waterGeometry, waterMaterial);
         water.rotation.x = -Math.PI / 2;
         scene.add(water);
 
-        // Add a Cube
-        const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.position.set(0, 0.5, 0);
-        scene.add(cube);
-
-        // Gradient background
-        const vertexShader = `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `;
-        const fragmentShader = `
-            uniform float time;
-            varying vec2 vUv;
-
-            void main() {
-                vec3 colors[8];
-                colors[0] = vec3(0.0, 0.02, 0.2);   // Dark blue (000433)
-                colors[1] = vec3(1.0, 0.57, 0.57); // Pinkish (ff9191)
-                colors[2] = vec3(0.53, 0.85, 1.0); // Light blue (87d9ff)
-                colors[3] = vec3(0.2, 0.56, 1.0); // Regular sky blue (3490fe)
-                colors[4] = vec3(1.0, 0.68, 0.26); // Orange (ffad43)
-                colors[5] = vec3(1.0, 0.36, 0.36); // Reddish pink (ff5b5b)
-                colors[6] = vec3(0.1, 0.12, 0.75); // Evening blue (171fbf)
-                colors[7] = vec3(0.0, 0.02, 0.2);  // Back to dark blue (000433)
-
-                float progress = mod(time, 24.0); // Extended to 24 (3x slower cycle)
-                vec3 fromColor, toColor;
-                float blendFactor;
-
-                if (progress < 6.0) {
-                    fromColor = colors[0];
-                    toColor = colors[1];
-                    blendFactor = progress / 6.0;
-                } else if (progress < 12.0) {
-                    fromColor = colors[1];
-                    toColor = colors[2];
-                    blendFactor = (progress - 6.0) / 6.0;
-                } else if (progress < 18.0) {
-                    fromColor = colors[2];
-                    toColor = colors[3];
-                    blendFactor = (progress - 12.0) / 6.0;
-                } else {
-                    fromColor = colors[3];
-                    toColor = colors[0];
-                    blendFactor = (progress - 18.0) / 6.0;
-                }
-
-                vec3 color = mix(fromColor, toColor, blendFactor);
-                gl_FragColor = vec4(mix(color, vec3(0.0, 0.0, 0.0), vUv.y), 1.0);
-            }
-        `;
-
-        const gradientMaterial = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            uniforms: {
-                time: { value: 0 }
+        // Load the new GLTF model
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            './result.gltf', // Ensure the new result file is correctly referenced
+            (gltf) => {
+                const model = gltf.scene;
+                model.position.set(0, 0.5, 0); // Adjust position if needed
+                scene.add(model);
             },
-            side: THREE.BackSide
-        });
+            undefined,
+            (error) => {
+                console.error('An error occurred while loading the model:', error);
+            }
+        );
 
-        const gradientGeometry = new THREE.SphereGeometry(500, 32, 32);
-        const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
-        scene.add(gradientMesh);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-        // Animate water movement
-        let offset = 0;
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Camera position
+        camera.position.set(0, 2, 5);
+        camera.lookAt(0, 0, 0);
+
+        // Render loop
         function animate() {
-            offset += 0.001; // Keep water movement speed consistent
-            waterTexture.offset.set(offset, offset);
-
-            // Update gradient time
-            gradientMaterial.uniforms.time.value += 0.01; // Gradient transitions remain smooth
-
-            controls.update();
-            renderer.render(scene, camera);
             requestAnimationFrame(animate);
+            controls.update();
+            updateBackgroundGradient();
+            renderer.render(scene, camera);
         }
-
         animate();
 
-        // Adjust canvas size on window resize
+        // Resize handler
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
