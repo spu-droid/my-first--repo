@@ -109,22 +109,6 @@
             }, 1000); // 1-second black screen
         }
 
-        // Preload model and assets
-        function preloadAssets(callback) {
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                './result.gltf',
-                (gltf) => {
-                    loaded = true;
-                    callback(gltf);
-                },
-                undefined,
-                (error) => {
-                    console.error('An error occurred while preloading assets:', error);
-                }
-            );
-        }
-
         // Initialize 3D scene
         function startIslandScene() {
             // Scene setup
@@ -167,7 +151,8 @@
             scene.add(water);
 
             // Load the island model
-            preloadAssets((gltf) => {
+            const gltfLoader = new THREE.GLTFLoader();
+            gltfLoader.load('./result.gltf', (gltf) => {
                 const model = gltf.scene;
                 model.position.set(0, 0, 0); // Adjust position if needed
                 model.scale.set(0.5, 0.5, 0.5); // Scale down
@@ -200,3 +185,4 @@
     </script>
 </body>
 </html>
+
