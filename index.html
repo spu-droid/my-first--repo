@@ -6,6 +6,8 @@
     <title>3D Viewer</title>
     <!-- Include Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Include OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
     <style>
         body {
             margin: 0;
@@ -24,6 +26,13 @@
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
+
+        // Add OrbitControls for interaction
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Smooth transitions
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false; // Disables vertical panning
+        controls.maxPolarAngle = Math.PI / 2; // Prevents the camera from going below the ground
 
         // Add lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -52,12 +61,13 @@
         scene.add(cube);
 
         // Set the camera position
-        camera.position.set(0, 10, 20);
+        camera.position.set(5, 10, 15);
         camera.lookAt(0, 0, 0);
 
         // Render the scene
         function animate() {
             requestAnimationFrame(animate);
+            controls.update(); // Update OrbitControls
             renderer.render(scene, camera);
         }
         animate();
