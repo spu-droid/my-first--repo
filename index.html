@@ -1,9 +1,3 @@
-
-Here’s the updated code with your requested colors incorporated into the background gradient. The colors will dynamically transition through the day-sky palette you described:
-
-Updated Code
-html
-Copy code
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,15 +46,15 @@ Copy code
 
         // Water surface (Plane with water texture)
         const textureLoader = new THREE.TextureLoader();
-        const waterTexture = textureLoader.load('sea_1.png'); // Make sure the texture file is in the same folder
+        const waterTexture = textureLoader.load('sea_1.png'); // Ensure texture is in the same folder
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
-        waterTexture.repeat.set(10, 10); // Adjust tiling for a larger surface
+        waterTexture.repeat.set(10, 10);
 
         const waterMaterial = new THREE.MeshStandardMaterial({ map: waterTexture });
-        const waterGeometry = new THREE.PlaneGeometry(100, 100); // Larger water plane
+        const waterGeometry = new THREE.PlaneGeometry(100, 100);
         const water = new THREE.Mesh(waterGeometry, waterMaterial);
-        water.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
+        water.rotation.x = -Math.PI / 2;
         scene.add(water);
 
         // Add a Cube
@@ -83,22 +77,40 @@ Copy code
             varying vec2 vUv;
 
             void main() {
-                vec3 colors[7];
-                colors[0] = vec3(0.0, 0.02, 0.2);   // 000433
-                colors[1] = vec3(1.0, 0.57, 0.57); // ff9191
-                colors[2] = vec3(0.2, 0.56, 1.0);  // 3490fe
-                colors[3] = vec3(1.0, 0.68, 0.26); // ffad43
-                colors[4] = vec3(1.0, 0.36, 0.36); // ff5b5b
-                colors[5] = vec3(0.1, 0.12, 0.75); // 171fbf
-                colors[6] = vec3(0.0, 0.02, 0.2);  // Back to 000433
+                vec3 colors[8];
+                colors[0] = vec3(0.0, 0.02, 0.2);   // Dark blue (000433)
+                colors[1] = vec3(1.0, 0.57, 0.57); // Pinkish (ff9191)
+                colors[2] = vec3(0.6, 0.8, 1.0);  // Light blue (Sky, brighter)
+                colors[3] = vec3(0.2, 0.56, 1.0); // Regular sky blue (3490fe)
+                colors[4] = vec3(1.0, 0.68, 0.26); // Orange (ffad43)
+                colors[5] = vec3(1.0, 0.36, 0.36); // Reddish pink (ff5b5b)
+                colors[6] = vec3(0.1, 0.12, 0.75); // Evening blue (171fbf)
+                colors[7] = vec3(0.0, 0.02, 0.2);  // Back to dark blue (000433)
 
-                float progress = mod(time, 6.0); // Cycle through 6 stages
-                vec3 fromColor = colors[int(floor(progress))];
-                vec3 toColor = colors[int(ceil(progress)) % 7];
-                float blendFactor = fract(progress);
+                float progress = mod(time, 24.0); // Extended to 24 (3x slower cycle)
+                vec3 fromColor, toColor;
+                float blendFactor;
+
+                if (progress < 6.0) {
+                    fromColor = colors[0];
+                    toColor = colors[1];
+                    blendFactor = progress / 6.0;
+                } else if (progress < 12.0) {
+                    fromColor = colors[1];
+                    toColor = colors[2];
+                    blendFactor = (progress - 6.0) / 6.0;
+                } else if (progress < 18.0) {
+                    fromColor = colors[2];
+                    toColor = colors[3];
+                    blendFactor = (progress - 12.0) / 6.0;
+                } else {
+                    fromColor = colors[3];
+                    toColor = colors[0];
+                    blendFactor = (progress - 18.0) / 6.0;
+                }
 
                 vec3 color = mix(fromColor, toColor, blendFactor);
-                gl_FragColor = vec4(mix(color, vec3(0.0, 0.0, 0.0), vUv.y), 1.0); // Gradient fades upwards
+                gl_FragColor = vec4(mix(color, vec3(0.0, 0.0, 0.0), vUv.y), 1.0);
             }
         `;
 
@@ -106,7 +118,7 @@ Copy code
             vertexShader: vertexShader,
             fragmentShader: fragmentShader,
             uniforms: {
-                time: { value: 0 } // Pass time as a uniform
+                time: { value: 0 }
             },
             side: THREE.BackSide
         });
@@ -118,11 +130,11 @@ Copy code
         // Animate water movement
         let offset = 0;
         function animate() {
-            offset += 0.002; // Slow water movement
-            waterTexture.offset.set(offset, offset); // Move the texture for a wave effect
+            offset += 0.001; // Slower water movement
+            waterTexture.offset.set(offset, offset);
 
             // Update gradient time
-            gradientMaterial.uniforms.time.value += 0.02;
+            gradientMaterial.uniforms.time.value += 0.01; // Slower gradient transitions
 
             controls.update();
             renderer.render(scene, camera);
@@ -131,7 +143,7 @@ Copy code
 
         animate();
 
-        // Adjust canvas size when resizing the window
+        // Adjust canvas size on window resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
