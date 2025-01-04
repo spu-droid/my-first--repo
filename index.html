@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer with Extended Water</title>
+    <title>3D Viewer with Limited Zoom and Rotation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
@@ -32,8 +32,16 @@
 
         // OrbitControls setup
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.maxPolarAngle = Math.PI / 2; // Restrict vertical movement to above the plane
-        controls.enableDamping = true;
+
+        // Limit vertical rotation (min and max polar angle)
+        controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees (in radians)
+        controls.maxPolarAngle = Math.PI / 2; // Maximum angle: 90 degrees (above the plane)
+
+        // Limit zoom (min and max distance from the target)
+        controls.minDistance = 5; // Minimum zoom distance
+        controls.maxDistance = 50; // Maximum zoom distance
+
+        controls.enableDamping = true; // Enable damping for smooth controls
 
         // Lighting setup
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Reduced intensity
