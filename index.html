@@ -12,7 +12,6 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(to top, #F08080, #87CEFA); /* Gradient background */
         }
         canvas {
             display: block;
@@ -64,6 +63,33 @@
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         cube.position.set(0, 0.5, 0);
         scene.add(cube);
+
+        // Gradient background
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+        const fragmentShader = `
+            varying vec2 vUv;
+            void main() {
+                vec3 color1 = vec3(0.94, 0.5, 0.5); // Light Coral (#F08080)
+                vec3 color2 = vec3(0.53, 0.81, 0.92); // Sky Blue (#87CEEB)
+                gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
+            }
+        `;
+
+        const gradientMaterial = new THREE.ShaderMaterial({
+            vertexShader: vertexShader,
+            fragmentShader: fragmentShader,
+            side: THREE.BackSide
+        });
+
+        const gradientGeometry = new THREE.SphereGeometry(500, 32, 32);
+        const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
+        scene.add(gradientMesh);
 
         // Animate water movement
         let offset = 0;
