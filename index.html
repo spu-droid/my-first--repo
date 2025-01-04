@@ -67,9 +67,9 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Animate the sea texture
-            seaTexture.offset.x += 0.01; // Move horizontally
-            seaTexture.offset.y += 0.005; // Move vertically
+            // Slow down the texture animation
+            seaTexture.offset.x += 0.002; // Slower horizontal movement
+            seaTexture.offset.y += 0.001; // Slower vertical movement
 
             controls.update();
             renderer.render(scene, camera);
