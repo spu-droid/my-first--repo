@@ -36,10 +36,10 @@
         controls.enableDamping = true;
 
         // Lighting setup
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Reduced intensity
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4); // Reduced intensity
         directionalLight.position.set(5, 10, 5);
         scene.add(directionalLight);
 
@@ -70,7 +70,7 @@
         const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
         scene.add(gradientMesh);
 
-        // Extended water plane
+        // Water plane
         const waterTexture = new THREE.TextureLoader().load('sea_1.png');
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
@@ -89,7 +89,7 @@
             waterTexture.offset.y = waterOffset;
         }
 
-        // Load the GLTF model and rotate it
+        // Load the GLTF model and adjust its material
         const loader = new THREE.GLTFLoader();
         loader.load(
             './result.gltf', // Ensure the correct file is referenced
@@ -102,6 +102,8 @@
                 model.traverse((child) => {
                     if (child.isMesh) {
                         child.material.color.set(0xCACBCB); // Set gray color (#CACBCB)
+                        child.material.roughness = 0.8; // Make less reflective
+                        child.material.metalness = 0.1; // Reduce metallic appearance
                     }
                 });
                 scene.add(model);
@@ -130,3 +132,4 @@
     </script>
 </body>
 </html>
+
