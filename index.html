@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's island</title>
+    <title>ANNA'S ISLAND</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
@@ -20,7 +20,7 @@
             top: 5%; /* Adjust dynamically based on screen size */
             left: 50%;
             transform: translateX(-50%);
-            font-size: calc(16px + 1vw); /* Adjust font size based on viewport width */
+            font-size: calc(20px + 1vw); /* Adjust font size based on viewport width */
             color: orange;
             font-family: 'Didot', serif;
             z-index: 1000; /* Ensure it appears above the canvas */
@@ -29,7 +29,7 @@
     </style>
 </head>
 <body>
-    <div id="title">Anna's Island</div>
+    <div id="title">ANNA'S ISLAND</div>
     <script>
         // Scene setup
         const scene = new THREE.Scene();
@@ -127,7 +127,7 @@
             (gltf) => {
                 const model = gltf.scene;
                 model.position.set(0, 0, 0); // Adjust position if needed
-                model.rotation.x = (3 * Math.PI) / 2; // Rotate around the X-axis
+                model.rotation.x = (3 * Math.PI) / 5; // Rotate around the X-axis
                 model.rotation.z = Math.PI; // Adjust rotation
                 model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
                 model.traverse((child) => {
