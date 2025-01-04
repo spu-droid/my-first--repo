@@ -50,12 +50,12 @@
         const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
         const water = new THREE.Water(waterGeometry, {
             color: '#001e0f',
-            scale: 4,
+            scale: 2,
             flowDirection: new THREE.Vector2(1, 1),
-            textureWidth: 1024,
-            textureHeight: 1024,
+            textureWidth: 512,
+            textureHeight: 512,
         });
-        water.rotation.x = -Math.PI / 2;
+        water.rotation.x = -Math.PI / 2; // Rotate plane to be horizontal
         scene.add(water);
 
         // Load the GLTF model
@@ -74,13 +74,13 @@
         );
 
         // Set the camera position
-        camera.position.set(0, 10, 30);
+        camera.position.set(0, 5, 10);
         camera.lookAt(0, 0, 0);
 
         // Animate the scene
         function animate() {
             requestAnimationFrame(animate);
-            water.material.uniforms['time'].value += 1.0 / 60.0; // Animate water
+            water.material.uniforms['time'].value += 0.05; // Animate water
             controls.update();
             renderer.render(scene, camera);
         }
