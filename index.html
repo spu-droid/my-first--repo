@@ -58,7 +58,7 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
         controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees (in radians)
-        controls.maxPolarAngle = (3 * Math.PI) / 5; // Maximum angle: 90 degrees (above the plane)
+        controls.maxPolarAngle = Math.PI / 3; // Maximum angle: 90 degrees (above the plane)
 
         controls.minDistance = 5; // Minimum zoom distance
         controls.maxDistance = 25; // Maximum zoom distance
