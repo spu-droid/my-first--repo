@@ -113,7 +113,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v6</div> <!-- Updated version number -->
+    <div id="version">v7</div> <!-- Updated version number -->
     <div id="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
@@ -303,14 +303,14 @@
                         songLinks.style.opacity = 1; // Fade in links
                     }
                 } else {
-                    if (camera.position.y >= 0) {
+                    if (camera.position.y >= 0 && underwaterMode) {
                         underwaterMode = false;
                         songLinks.style.opacity = 0; // Fade out links
                         setTimeout(() => {
                             if (!underwaterMode) {
                                 songLinks.style.display = "none";
                             }
-                        }, 1000); // Delay hiding the links until fade out is complete
+                        }, 1000); // Delay hiding the links until fade-out is complete
                     }
                 }
 
@@ -353,3 +353,4 @@
     </script>
 </body>
 </html>
+
