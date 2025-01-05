@@ -28,6 +28,18 @@
             transform: translate(-50%, -50%);
         }
 
+        #version {
+            font-size: calc(10px + 0.5vw);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3); /* Transparent */
+            position: absolute;
+            bottom: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
         #world {
             opacity: 0;
             transition: opacity 5s ease-in-out; /* Slower fade-out of black screen */
@@ -78,6 +90,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
+    <div id="version">v1</div> <!-- Version number -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
@@ -87,9 +100,17 @@
         const worldContainer = document.getElementById('world');
         const title = document.getElementById('title');
         const footer = document.getElementById('footer');
+        const version = document.getElementById('version');
+
+        // Toggle visibility of the version number here
+        const showVersionNumber = true; // Set to false to hide the version number
+
+        if (!showVersionNumber) {
+            version.style.display = 'none'; // Hide version number if not visible
+        }
 
         const texts = [
-            { content: "Hey", pause: 2000 },
+            { content: "Hey,", pause: 2000 },
             { content: "Do you remember how you once told me,", pause: 4000 },
             { content: "how much you like the idea behind Rose Island?", pause: 4000 },
             { content: "Well,", pause: 2000 },
@@ -107,6 +128,11 @@
 
             setTimeout(() => {
                 intro.style.opacity = 0;
+
+                if (showVersionNumber) {
+                    version.style.opacity = 0; // Fade out version number with the intro
+                }
+
                 setTimeout(() => {
                     currentTextIndex++;
 
@@ -242,15 +268,11 @@
                     camera.position.y = currentDistance * Math.sin(currentAngle);
                     camera.lookAt(0, 0, 0);
 
-                    // Start fading in the texts once the animation is complete
                     if (animationProgress >= 1) {
                         title.style.display = "block";
                         footer.style.display = "block";
-
-                        // Fade-in animation for the top and bottom texts
-                        title.style.opacity = 1; // Top text
-                        footer.style.opacity = 1; // Bottom text
-                        // ** This section handles the fade-in timing of the texts **
+                        title.style.opacity = 1;
+                        footer.style.opacity = 1;
                     }
                 }
 
