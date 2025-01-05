@@ -144,6 +144,7 @@
         let currentTextIndex = 0;
         let clickCount = 0;
         let underwaterMode = false;
+        let underwaterDebounce = false; // Prevent rapid changes
 
         function displayText() {
             const currentText = texts[currentTextIndex];
@@ -205,8 +206,8 @@
                 varying vec2 vUv;
 
                 void main() {
-                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
-                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
+                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.1) * 0.5 + 0.5);
+                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.1) * 0.5 + 0.5);
                     gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
                 }
             `;
@@ -244,7 +245,7 @@
 
             let waterOffset = 0;
             function moveWater() {
-                waterOffset += 0.001;
+                waterOffset += 0.0005; // Slower water movement
                 waterTexture.offset.y = waterOffset;
             }
 
@@ -292,7 +293,8 @@
                         }
                     }
 
-                    if (camera.position.y < 0) {
+                    if (camera.position.y < 0 && !underwaterDebounce) {
+                        underwaterDebounce = true;
                         underwaterMode = true;
                         songLinks.style.opacity = 1;
                         songLinks.style.display = "block";
@@ -302,10 +304,11 @@
                     camera.lookAt(0, 0, 0);
                 }
 
-                if (camera.position.y >= 0) {
+                if (camera.position.y >= 0 && underwaterMode) {
+                    underwaterMode = false;
                     songLinks.style.opacity = 0;
                     setTimeout(() => {
-                        if (camera.position.y >= 0) {
+                        if (!underwaterMode) {
                             songLinks.style.display = "none";
                         }
                     }, 1000); // Delay to ensure smooth fade-out
@@ -313,8 +316,10 @@
 
                 controls.update();
                 moveWater();
-                gradientMaterial.uniforms.time.value += 0.01;
+                gradientMaterial.uniforms.time.value += 0.005; // Slower color transition
                 renderer.render(scene, camera);
+
+                setTimeout(() => underwaterDebounce = false, 200); // Reset debounce
             }
 
             animate();
@@ -345,22 +350,6 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
-
-            function handleUnderwater() {
-                if (camera.position.y >= 0) {
-                    songLinks.style.opacity = 0;
-                    setTimeout(() => {
-                        if (camera.position.y >= 0) {
-                            songLinks.style.display = "none";
-                        }
-                    }, 1000); // Delay to ensure smooth fade-out
-                } else {
-                    songLinks.style.opacity = 1;
-                    songLinks.style.display = "block";
-                }
-            }
-
-            setInterval(handleUnderwater, 100); // Check underwater state periodically
         }
 
         document.body.addEventListener('click', (event) => {
