@@ -62,7 +62,7 @@
             z-index: 1000;
             text-align: center;
             opacity: 0;
-            transition: opacity 1s ease-in-out; /* Fade-in duration */
+            transition: opacity 2s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
         }
 
@@ -77,7 +77,7 @@
             z-index: 1000;
             text-align: center;
             opacity: 0;
-            transition: opacity 1s ease-in-out; /* Fade-in duration */
+            transition: opacity 2s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
         }
 
@@ -88,6 +88,8 @@
             transform: translate(-50%, -50%);
             text-align: center;
             display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Fade-in and fade-out */
         }
 
         .song-link {
@@ -108,7 +110,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v6</div> <!-- Version number incremented -->
+    <div id="version">v7</div> <!-- Version number incremented -->
     <div class="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank" class="song-link">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank" class="song-link">Toute la pluie tombe sur moi</a>
@@ -171,7 +173,7 @@
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 30, 100);
+            camera.position.set(0, 30, 80); // Adjust home position here
 
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -292,12 +294,21 @@
 
                     if (camera.position.y < 0) {
                         underwaterMode = true;
+                        songLinks.style.opacity = 1;
                         songLinks.style.display = "block";
                     }
                 } else {
                     camera.position.set(0, -10, 30);
                     camera.lookAt(0, 0, 0);
-                    songLinks.style.display = "block";
+                }
+
+                if (camera.position.y >= 0) {
+                    songLinks.style.opacity = 0;
+                    setTimeout(() => {
+                        if (camera.position.y >= 0) {
+                            songLinks.style.display = "none";
+                        }
+                    }, 1000); // Delay to ensure smooth fade-out
                 }
 
                 controls.update();
@@ -315,9 +326,9 @@
                     resetClickCount = 0;
                     underwaterMode = false;
                     animationProgress = 1;
-                    camera.position.set(0, 30, 100);
+                    camera.position.set(0, 30, 80); // Adjust home position here
                     controls.target.set(0, 0, 0);
-                    songLinks.style.display = "none";
+                    controls.enabled = true; // Re-enable controls
                 }
             });
 
@@ -329,8 +340,14 @@
 
             function handleUnderwater() {
                 if (camera.position.y >= 0) {
-                    songLinks.style.display = "none";
+                    songLinks.style.opacity = 0;
+                    setTimeout(() => {
+                        if (camera.position.y >= 0) {
+                            songLinks.style.display = "none";
+                        }
+                    }, 1000); // Delay to ensure smooth fade-out
                 } else {
+                    songLinks.style.opacity = 1;
                     songLinks.style.display = "block";
                 }
             }
@@ -338,13 +355,21 @@
             setInterval(handleUnderwater, 100); // Check underwater state periodically
         }
 
-        document.body.addEventListener('click', () => {
+        document.body.addEventListener('click', (event) => {
             clickCount++;
             if (clickCount >= 3) {
                 intro.style.display = "none";
                 loadWorld();
             }
         });
+
+        document.body.addEventListener('touchstart', (event) => {
+            clickCount++;
+            if (clickCount >= 3) {
+                intro.style.display = "none";
+                loadWorld();
+            }
+        }); // Add touch support for mobile
 
         setTimeout(displayText, 1000);
     </script>
