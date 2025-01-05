@@ -61,6 +61,7 @@
         ];
 
         let currentTextIndex = 0;
+        let clickCount = 0;
 
         function displayText() {
             const currentText = texts[currentTextIndex];
@@ -82,7 +83,7 @@
                         // Load the 3D world after all texts
                         loadWorld();
                     }
-                }, 3000); // Wait 1.5 seconds for fade-out transition
+                }, 1500); // Wait 1.5 seconds for fade-out transition
             }, currentText.pause);
         }
 
@@ -95,7 +96,7 @@
 
             // Camera and renderer setup
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 30, 60); // Start at the furthest point
+            camera.position.set(0, 30, 100); // Start farther away
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             worldContainer.appendChild(renderer.domElement);
@@ -104,8 +105,8 @@
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees
             controls.maxPolarAngle = Math.PI / 2; // Maximum angle: 90 degrees
-            controls.minDistance = 5; // Minimum zoom distance
-            controls.maxDistance = 50; // Maximum zoom distance
+            controls.minDistance = 10; // Minimum zoom distance
+            controls.maxDistance = 80; // Maximum zoom distance
             controls.enableDamping = true; // Enable damping for smooth controls
 
             // Lighting setup
@@ -201,8 +202,8 @@
             );
 
             // Animate camera movement
-            const initialPosition = { distance: 60, angle: 30 * (Math.PI / 180) };
-            const targetPosition = { distance: controls.minDistance / 2, angle: 15 * (Math.PI / 180) };
+            const initialPosition = { distance: 100, angle: 30 * (Math.PI / 180) };
+            const targetPosition = { distance: 40, angle: 15 * (Math.PI / 180) };
             let animationProgress = 0;
 
             function animate() {
@@ -210,7 +211,7 @@
 
                 // Smooth camera movement
                 if (animationProgress < 1) {
-                    animationProgress += 0.01; // Adjust speed as necessary
+                    animationProgress += 0.005; // Slower speed
                     const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
                     const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
 
@@ -234,6 +235,15 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         }
+
+        // Skip intro on three clicks
+        document.body.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount >= 3) {
+                intro.style.display = "none";
+                loadWorld();
+            }
+        });
 
         // Start the intro sequence
         setTimeout(displayText, 1000); // Start after a 1-second delay
