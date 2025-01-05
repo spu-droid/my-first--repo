@@ -50,7 +50,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 6s ease-in-out; /* 3x slower fade-in */
+            transition: opacity 2.5s ease-in-out; /* 2.5 seconds fade-in */
         }
 
         #footer {
@@ -65,7 +65,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 6s ease-in-out; /* 3x slower fade-in */
+            transition: opacity 2.5s ease-in-out; /* 2.5 seconds fade-in */
         }
 
         canvas {
@@ -233,7 +233,7 @@
                 requestAnimationFrame(animate);
 
                 if (animationProgress < 1) {
-                    animationProgress += 0.0067; // 1.5x slower
+                    animationProgress += 0.0067;
                     const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
                     const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
 
@@ -242,11 +242,15 @@
                     camera.position.y = currentDistance * Math.sin(currentAngle);
                     camera.lookAt(0, 0, 0);
 
+                    // Start fading in the texts once the animation is complete
                     if (animationProgress >= 1) {
                         title.style.display = "block";
                         footer.style.display = "block";
-                        title.style.opacity = 1;
-                        footer.style.opacity = 1;
+
+                        // Fade-in animation for the top and bottom texts
+                        title.style.opacity = 1; // Top text
+                        footer.style.opacity = 1; // Bottom text
+                        // ** This section handles the fade-in timing of the texts **
                     }
                 }
 
@@ -276,4 +280,3 @@
     </script>
 </body>
 </html>
-
