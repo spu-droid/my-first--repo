@@ -110,7 +110,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v8</div> <!-- Version number incremented -->
+    <div id="version">v9</div> <!-- Version number incremented -->
     <div class="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank" class="song-link">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank" class="song-link">Toute la pluie tombe sur moi</a>
@@ -144,7 +144,6 @@
         let currentTextIndex = 0;
         let clickCount = 0;
         let underwaterMode = false;
-        let underwaterDebounce = false; // Prevent rapid changes
 
         function displayText() {
             const currentText = texts[currentTextIndex];
@@ -174,18 +173,15 @@
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 30, 80); // Adjust home position here
+            camera.position.set(0, 30, 80);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             worldContainer.appendChild(renderer.domElement);
 
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.minPolarAngle = (5 * Math.PI) / 180;
-            controls.maxPolarAngle = (9 * Math.PI) / 19;
-            controls.minDistance = 10;
-            controls.maxDistance = 80;
             controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
@@ -194,181 +190,37 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            const vertexShader = `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `;
-            const fragmentShader = `
-                uniform float time;
-                varying vec2 vUv;
-
-                void main() {
-                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.1) * 0.5 + 0.5);
-                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.1) * 0.5 + 0.5);
-                    gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
-                }
-            `;
-
-            const gradientMaterial = new THREE.ShaderMaterial({
-                vertexShader,
-                fragmentShader,
-                uniforms: { time: { value: 0 } },
-                side: THREE.BackSide
-            });
-
-            const gradientGeometry = new THREE.SphereGeometry(500, 32, 32);
-            const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
-            scene.add(gradientMesh);
-
             const textureLoader = new THREE.TextureLoader();
             const waterTexture = textureLoader.load('sea_1.png');
             waterTexture.wrapS = THREE.RepeatWrapping;
             waterTexture.wrapT = THREE.RepeatWrapping;
-            waterTexture.repeat.set(10, 10);
 
             const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
             const waterGeometry = new THREE.PlaneGeometry(100, 100);
-            const tileSize = 100;
-            const tiles = 7;
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
 
-            for (let x = -tiles / 2; x < tiles / 2; x++) {
-                for (let z = -tiles / 2; z < tiles / 2; z++) {
-                    const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
-                    waterTile.position.set(x * tileSize, 0, z * tileSize);
-                    waterTile.rotation.x = -Math.PI / 2;
-                    scene.add(waterTile);
-                }
-            }
+            scene.add(water);
 
-            let waterOffset = 0;
-            function moveWater() {
-                waterOffset += 0.0005; // Slower water movement
-                waterTexture.offset.y = waterOffset;
-            }
-
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                './result.gltf',
-                (gltf) => {
-                    const model = gltf.scene;
-                    model.position.set(0, 0, 0);
-                    model.rotation.x = (3 * Math.PI) / 2;
-                    model.rotation.z = Math.PI;
-                    model.scale.set(0.5, 0.5, 0.5);
-                    model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material.color.set(0xCACBCB);
-                            child.material.roughness = 0.8;
-                            child.material.metalness = 0.1;
-                        }
-                    });
-                    scene.add(model);
-                },
-                undefined,
-                (error) => console.error('An error occurred while loading the model:', error)
-            );
-
-            let animationProgress = 0;
-
-            function animate() {
-                requestAnimationFrame(animate);
-
-                if (!underwaterMode) {
-                    if (animationProgress < 1) {
-                        animationProgress += 0.0054; // 1.25x slower
-                        const currentDistance = THREE.MathUtils.lerp(100, 20, animationProgress);
-                        const currentAngle = THREE.MathUtils.lerp(30 * (Math.PI / 180), 15 * (Math.PI / 180), animationProgress);
-
-                        camera.position.x = currentDistance * Math.sin(currentAngle);
-                        camera.position.z = currentDistance * Math.cos(currentAngle);
-                        camera.position.y = currentDistance * Math.sin(currentAngle);
-                        camera.lookAt(0, 0, 0);
-
-                        if (animationProgress >= 1) {
-                            title.style.opacity = 1; // Fade in
-                            footer.style.opacity = 1; // Fade in
-                        }
-                    }
-
-                    if (camera.position.y < 0 && !underwaterDebounce) {
-                        underwaterDebounce = true;
-                        underwaterMode = true;
-                        songLinks.style.opacity = 1;
-                        songLinks.style.display = "block";
-                    }
+            function updateCamera() {
+                if (camera.position.y > 0) {
+                    songLinks.style.opacity = "0";
+                    setTimeout(() => (songLinks.style.display = "none"), 1000);
                 } else {
-                    camera.position.set(0, -10, 30);
-                    camera.lookAt(0, 0, 0);
+                    songLinks.style.opacity = "1";
+                    songLinks.style.display = "block";
                 }
-
-                if (camera.position.y >= 0 && underwaterMode) {
-                    underwaterMode = false;
-                    songLinks.style.opacity = 0;
-                    setTimeout(() => {
-                        if (!underwaterMode) {
-                            songLinks.style.display = "none";
-                        }
-                    }, 1000); // Delay to ensure smooth fade-out
-                }
-
-                controls.update();
-                moveWater();
-                gradientMaterial.uniforms.time.value += 0.005; // Slower color transition
-                renderer.render(scene, camera);
-
-                setTimeout(() => underwaterDebounce = false, 200); // Reset debounce
             }
-
+            
+            function animate() {
+                updateCamera();
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
             animate();
-
-            let resetClickCount = 0;
-            document.body.addEventListener('click', () => {
-                resetClickCount++;
-                if (resetClickCount >= 3) {
-                    resetClickCount = 0;
-                    underwaterMode = false;
-                    animationProgress = 1;
-                    camera.position.set(0, 30, 80); // Adjust home position here
-                    controls.target.set(0, 0, 0);
-                    controls.enabled = true; // Re-enable controls
-                }
-            });
-
-            document.body.addEventListener('touchstart', (event) => {
-                clickCount++;
-                if (clickCount >= 3) {
-                    intro.style.display = "none";
-                    loadWorld();
-                }
-            }); // Add touch support for mobile
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
         }
 
-        document.body.addEventListener('click', (event) => {
-            clickCount++;
-            if (clickCount >= 3) {
-                intro.style.display = "none";
-                loadWorld();
-            }
-        });
-
-        document.body.addEventListener('touchstart', (event) => {
-            clickCount++;
-            if (clickCount >= 3) {
-                intro.style.display = "none";
-                loadWorld();
-            }
-        });
-
-        setTimeout(displayText, 1000);
+        displayText();
     </script>
 </body>
 </html>
