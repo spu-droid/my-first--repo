@@ -82,7 +82,7 @@
                         // Load the 3D world after all texts
                         loadWorld();
                     }
-                }, 1500); // Wait 1.5 seconds for fade-out transition
+                }, 3000); // Wait 1.5 seconds for fade-out transition
             }, currentText.pause);
         }
 
@@ -95,8 +95,7 @@
 
             // Camera and renderer setup
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 20);
-
+            camera.position.set(0, 30, 60); // Start at the furthest point
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             worldContainer.appendChild(renderer.domElement);
@@ -201,9 +200,26 @@
                 (error) => console.error('An error occurred while loading the model:', error)
             );
 
-            // Render loop
+            // Animate camera movement
+            const initialPosition = { distance: 60, angle: 30 * (Math.PI / 180) };
+            const targetPosition = { distance: controls.minDistance / 2, angle: 15 * (Math.PI / 180) };
+            let animationProgress = 0;
+
             function animate() {
                 requestAnimationFrame(animate);
+
+                // Smooth camera movement
+                if (animationProgress < 1) {
+                    animationProgress += 0.01; // Adjust speed as necessary
+                    const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
+                    const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
+
+                    camera.position.x = currentDistance * Math.sin(currentAngle);
+                    camera.position.z = currentDistance * Math.cos(currentAngle);
+                    camera.position.y = currentDistance * Math.sin(currentAngle);
+                    camera.lookAt(0, 0, 0);
+                }
+
                 controls.update();
                 moveWater(); // Ensure water moves
                 gradientMaterial.uniforms.time.value += 0.01; // Update gradient animation
