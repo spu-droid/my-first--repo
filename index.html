@@ -211,7 +211,7 @@
 
                 // Smooth camera movement
                 if (animationProgress < 1) {
-                    animationProgress += 0.005; // Slower speed
+                    animationProgress += 0.01; // Slower speed
                     const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
                     const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
 
