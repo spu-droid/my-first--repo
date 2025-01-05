@@ -83,16 +83,22 @@
             user-select: none; /* Prevent text selection */
         }
 
-        #song-link {
+        #song-links {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            text-align: center;
             font-size: calc(14px + 1.2vw);
             color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
             display: none;
+        }
+
+        #song-links a {
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
+            display: block; /* Stack links vertically */
+            margin-bottom: 10px; /* Adjust space between links */
         }
 
         canvas {
@@ -105,8 +111,12 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v4</div> <!-- Version number -->
-    <div id="song-link" onclick="window.open('https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR', '_blank')">Primavera in anticipo</div>
+    <div id="version">v5</div> <!-- Version number -->
+    <div id="song-links">
+        <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
+        <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
+        <a href="https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl" target="_blank">Julge laul</a>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
@@ -117,7 +127,7 @@
         const title = document.getElementById('title');
         const footer = document.getElementById('footer');
         const version = document.getElementById('version');
-        const songLink = document.getElementById('song-link');
+        const songLinks = document.getElementById('song-links');
 
         const showVersionNumber = true;
         if (!showVersionNumber) {
@@ -287,12 +297,12 @@
 
                     if (camera.position.y < 0) {
                         underwaterMode = true;
-                        songLink.style.display = "block";
+                        songLinks.style.display = "block";
                     }
                 } else {
                     camera.position.set(0, -10, 30);
                     camera.lookAt(0, 0, 0);
-                    songLink.style.display = "block";
+                    songLinks.style.display = "block";
                 }
 
                 controls.update();
@@ -303,16 +313,14 @@
 
             animate();
 
-            let underwaterClicks = 0;
             document.body.addEventListener('click', () => {
                 clickCount++;
-                if (clickCount >= 3 || underwaterClicks >= 3) {
+                if (clickCount >= 3) {
                     underwaterMode = false;
-                    songLink.style.display = "none";
-                    animationProgress = 0;
+                    songLinks.style.display = "none";
+                    animationProgress = 1;
                     camera.position.set(0, 30, 100);
-                    title.style.display = "none";
-                    footer.style.display = "none";
+                    controls.reset();
                 }
             });
 
@@ -335,3 +343,4 @@
     </script>
 </body>
 </html>
+
