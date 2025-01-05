@@ -98,7 +98,7 @@
             color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
             display: block; /* Stack links vertically */
-            margin-bottom: 10px; /* Adjust space between links */
+            margin-bottom: 20px; /* Adjust space between links */
         }
 
         canvas {
@@ -111,7 +111,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v5</div> <!-- Version number -->
+    <div id="version">v6</div> <!-- Version number -->
     <div id="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
@@ -318,9 +318,12 @@
                 if (clickCount >= 3) {
                     underwaterMode = false;
                     songLinks.style.display = "none";
-                    animationProgress = 1;
                     camera.position.set(0, 30, 100);
-                    controls.reset();
+                    camera.lookAt(0, 0, 0); // Reset the camera angle
+                    controls.reset(); // Reset the controls
+                    title.style.display = "none";
+                    footer.style.display = "none";
+                    animationProgress = 1; // Ensure no further animation
                 }
             });
 
