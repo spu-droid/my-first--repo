@@ -11,11 +11,10 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: black;
             font-family: 'Didot', serif;
         }
 
-        #text-container {
+        #intro {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -28,9 +27,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
             z-index: 1000;
-            transition: opacity 1.5s ease;
+        }
+
+        canvas {
+            display: block;
         }
 
         #title {
@@ -56,58 +57,26 @@
             z-index: 1000;
             text-align: center;
         }
-
-        canvas {
-            display: block;
-        }
     </style>
 </head>
 <body>
-    <div id="text-container"></div>
+    <div id="intro">
+        Remember how you once told me how much you liked the idea behind Rose Island? Well here's one for you.
+    </div>
     <div id="title" style="display: none;">ANNA'S ISLAND</div>
     <div id="footer-text" style="display: none;">buon compleanno, maus</div>
 
     <script>
-        const textContainer = document.getElementById('text-container');
+        const intro = document.getElementById('intro');
         const title = document.getElementById('title');
         const footerText = document.getElementById('footer-text');
 
-        // Text sequences
-        const texts = [
-            "Remember how you told me how much you like the idea behind Rose Island?",
-            "Well, here is one for you."
-        ];
-
-        let currentTextIndex = 0;
-
-        // Show black screen for 2 seconds, then start animations
-        setTimeout(() => {
-            fadeInText(texts[currentTextIndex], () => {
-                setTimeout(() => {
-                    fadeOutText(() => {
-                        currentTextIndex++;
-                        if (currentTextIndex < texts.length) {
-                            fadeInText(texts[currentTextIndex], () => {
-                                setTimeout(() => {
-                                    fadeOutText(startIslandScene);
-                                }, 2000); // Wait before fading out second text
-                            });
-                        }
-                    });
-                }, 2000); // Wait before fading out first text
-            });
-        }, 2000); // Initial black screen duration
-
-        function fadeInText(text, callback) {
-            textContainer.innerText = text;
-            textContainer.style.opacity = 1;
-            setTimeout(callback, 1500); // Wait for fade-in to complete
-        }
-
-        function fadeOutText(callback) {
-            textContainer.style.opacity = 0;
-            setTimeout(callback, 1500); // Wait for fade-out to complete
-        }
+        intro.addEventListener('click', () => {
+            intro.style.display = 'none'; // Hide the intro text
+            title.style.display = 'block'; // Show the island title
+            footerText.style.display = 'block'; // Show the footer text
+            setTimeout(startIslandScene, 100); // Add a small delay before starting the 3D scene
+        });
 
         function preloadAssets(callback) {
             const textureLoader = new THREE.TextureLoader();
@@ -131,8 +100,6 @@
         }
 
         function startIslandScene() {
-            textContainer.style.display = 'none'; // Hide text container
-
             preloadAssets(([waterTexture, gltf]) => {
                 // Scene setup
                 const scene = new THREE.Scene();
@@ -164,14 +131,14 @@
                 scene.add(directionalLight);
 
                 // Gradient background
-                const vertexShader = `
+                const vertexShader = 
                     varying vec2 vUv;
                     void main() {
                         vUv = uv;
                         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     }
-                `;
-                const fragmentShader = `
+                ;
+                const fragmentShader = 
                     uniform float time;
                     varying vec2 vUv;
 
@@ -180,7 +147,7 @@
                         vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5); // Night to Sky Blue
                         gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
                     }
-                `;
+                ;
 
                 const gradientMaterial = new THREE.ShaderMaterial({
                     vertexShader: vertexShader,
@@ -203,20 +170,45 @@
                 const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
                 const waterGeometry = new THREE.PlaneGeometry(100, 100);
 
-                const water = new THREE.Mesh(waterGeometry, waterMaterial);
-                water.rotation.x = -Math.PI / 2;
-                scene.add(water);
+                // Create a tiled water surface
+                const tileSize = 100;
+                const tiles = 5; // Number of tiles in one direction
+                for (let x = -tiles / 2; x < tiles / 2; x++) {
+                    for (let z = -tiles / 2; z < tiles / 2; z++) {
+                        const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
+                        waterTile.position.set(x * tileSize, 0, z * tileSize);
+                        waterTile.rotation.x = -Math.PI / 2;
+                        scene.add(waterTile);
+                    }
+                }
 
-                // Load the GLTF model
+                // Move water texture slowly
+                let waterOffset = 0;
+                function moveWater() {
+                    waterOffset += 0.001; // Slow speed
+                    waterTexture.offset.y = waterOffset;
+                }
+
+                // Load the GLTF model and adjust its material
                 const model = gltf.scene;
-                model.position.set(0, 0, 0);
-                model.scale.set(0.5, 0.5, 0.5);
+                model.position.set(0, 0, 0); // Adjust position if needed
+                model.rotation.x = (3 * Math.PI) / 2; // Rotate around the X-axis
+                model.rotation.z = Math.PI; // Adjust rotation
+                model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.color.set(0xCACBCB); // Set gray color (#CACBCB)
+                        child.material.roughness = 0.8; // Make less reflective
+                        child.material.metalness = 0.1; // Reduce metallic appearance
+                    }
+                });
                 scene.add(model);
 
                 // Render loop
                 function animate() {
                     requestAnimationFrame(animate);
                     controls.update();
+                    moveWater(); // Ensure water moves
                     gradientMaterial.uniforms.time.value += 0.01; // Update gradient animation
                     renderer.render(scene, camera);
                 }
