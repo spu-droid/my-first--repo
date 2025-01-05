@@ -61,7 +61,7 @@
 </head>
 <body>
     <div id="intro">
-        Remember how you once told me how much you liked the idea behind Rose Island? Well here's one for you.
+        Remember how you told me how much you like the idea behind Rose Island? Well here's one for you.
     </div>
     <div id="title" style="display: none;">ANNA'S ISLAND</div>
     <div id="footer-text" style="display: none;">buon compleanno, maus</div>
@@ -131,14 +131,14 @@
                 scene.add(directionalLight);
 
                 // Gradient background
-                const vertexShader = 
+                const vertexShader = `
                     varying vec2 vUv;
                     void main() {
                         vUv = uv;
                         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                     }
-                ;
-                const fragmentShader = 
+                `;
+                const fragmentShader = `
                     uniform float time;
                     varying vec2 vUv;
 
@@ -147,7 +147,7 @@
                         vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5); // Night to Sky Blue
                         gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
                     }
-                ;
+                `;
 
                 const gradientMaterial = new THREE.ShaderMaterial({
                     vertexShader: vertexShader,
@@ -225,4 +225,3 @@
     </script>
 </body>
 </html>
-
