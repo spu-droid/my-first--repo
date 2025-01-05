@@ -103,19 +103,6 @@
             margin-bottom: 10px; /* Adjust space between links */
         }
 
-        #coordinates-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            text-align: center;
-            font-size: 14px;
-            padding: 5px 0;
-            z-index: 1000;
-        }
-
         canvas {
             display: block;
         }
@@ -126,13 +113,12 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v12</div> <!-- Updated version number -->
+    <div id="version">v11</div> <!-- Updated version number -->
     <div id="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
         <a href="https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl" target="_blank">Julge laul</a>
     </div>
-    <div id="coordinates-bar">Looking at: X: 0, Y: 0, Z: 0</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
@@ -144,14 +130,11 @@
         const footer = document.getElementById('footer');
         const version = document.getElementById('version');
         const songLinks = document.getElementById('song-links');
-        const coordinatesBar = document.getElementById('coordinates-bar');
 
         const showVersionNumber = true;
         if (!showVersionNumber) {
             version.style.display = 'none';
         }
-
-        let cameraLookAt = new THREE.Vector3(0, 0, 0);
 
         const texts = [
             { content: "Hey,", pause: 2000 },
@@ -214,6 +197,35 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+            const fragmentShader = `
+                uniform float time;
+                varying vec2 vUv;
+
+                void main() {
+                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
+                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
+                    gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
+                }
+            `;
+
+            const gradientMaterial = new THREE.ShaderMaterial({
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                uniforms: { time: { value: 0 } },
+                side: THREE.BackSide
+            });
+
+            const gradientGeometry = new THREE.SphereGeometry(500, 32, 32);
+            const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
+            scene.add(gradientMesh);
+
             const textureLoader = new THREE.TextureLoader();
             const waterTexture = textureLoader.load('sea_1.png');
             waterTexture.wrapS = THREE.RepeatWrapping;
@@ -234,19 +246,85 @@
                 }
             }
 
-            function updateCoordinates() {
-                camera.getWorldDirection(cameraLookAt);
-                coordinatesBar.textContent = `Looking at: X: ${cameraLookAt.x.toFixed(2)}, Y: ${cameraLookAt.y.toFixed(2)}, Z: ${cameraLookAt.z.toFixed(2)}`;
+            let waterOffset = 0;
+            function moveWater() {
+                waterOffset += 0.001;
+                waterTexture.offset.y = waterOffset;
             }
 
-            function animate() {
-                requestAnimationFrame(animate);
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                './result.gltf',
+                (gltf) => {
+                    const model = gltf.scene;
+                    model.position.set(0, 0, 0);
+                    model.rotation.x = (3 * Math.PI) / 2;
+                    model.rotation.z = Math.PI;
+                    model.scale.set(0.5, 0.5, 0.5);
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material.color.set(0xCACBCB);
+                            child.material.roughness = 0.8;
+                            child.material.metalness = 0.1;
+                        }
+                    });
+                    scene.add(model);
+                },
+                undefined,
+                (error) => console.error('An error occurred while loading the model:', error)
+            );
 
-                updateCoordinates();
+            let animationProgress = 0;
 
-                controls.update();
-                renderer.render(scene, camera);
-            }
+			function animate() {
+				requestAnimationFrame(animate);
+
+				// Check if underwater
+				if (camera.position.y < 0) {
+					if (!underwaterMode) {
+						// Enter underwater mode
+						underwaterMode = true;
+						linksVisible = true;
+						songLinks.style.display = "block";
+						setTimeout(() => (songLinks.style.opacity = 1), 10); // Fade in links
+					}
+				} else {
+					if (underwaterMode) {
+						// Exit underwater mode
+						underwaterMode = false;
+						linksVisible = false;
+						songLinks.style.opacity = 0; // Fade out links
+						setTimeout(() => (songLinks.style.display = "none"), 1000);
+					}
+				}
+
+				// Animation logic
+				if (!underwaterMode) {
+					if (animationProgress < 1) {
+						animationProgress += 0.0054; // 1.25x slower
+						const currentDistance = THREE.MathUtils.lerp(100, 20, animationProgress);
+						const currentAngle = THREE.MathUtils.lerp(30 * (Math.PI / 180), 15 * (Math.PI / 180), animationProgress);
+
+						camera.position.x = currentDistance * Math.sin(currentAngle);
+						camera.position.z = currentDistance * Math.cos(currentAngle);
+						camera.position.y = currentDistance * Math.sin(currentAngle);
+						camera.lookAt(0, 0, 0);
+
+						if (animationProgress >= 1) {
+							title.style.display = "block";
+							footer.style.display = "block";
+							title.style.opacity = 2;
+							footer.style.opacity = 2;
+						}
+					}
+				}
+
+				controls.update();
+				moveWater();
+				gradientMaterial.uniforms.time.value += 0.01;
+				renderer.render(scene, camera);
+			}
+
 
             animate();
 
@@ -256,6 +334,7 @@
                     underwaterMode = false;
                     songLinks.style.opacity = 0;
                     setTimeout(() => (songLinks.style.display = "none"), 1000);
+                    animationProgress = 1;
                     camera.position.set(0, 30, 100);
                     controls.reset();
                 }
