@@ -14,25 +14,51 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Ensure content stays vertically centered */
+            height: 100vh;
         }
 
         #intro {
             font-size: calc(16px + 0.8vw);
             text-align: center;
             opacity: 0;
-            transition: opacity 1s ease-in-out; /* Smooth fade in/out */
-            position: absolute; /* Ensure it's positioned in the center */
+            transition: opacity 1s ease-in-out;
+            position: absolute;
         }
 
         #world {
-            opacity: 0; /* Start fully transparent */
-            transition: opacity 2s ease-in-out; /* Smooth fade-in */
+            opacity: 0;
+            transition: opacity 4s ease-in-out; /* Slower fade-in */
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+        }
+
+        #title {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: calc(20px + 1vw);
+            color: orange;
+            font-family: 'Didot', serif;
+            z-index: 1000;
+            text-align: center;
+            display: none;
+        }
+
+        #footer {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: calc(14px + 0.8vw);
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Didot', serif;
+            z-index: 1000;
+            text-align: center;
+            display: none;
         }
 
         canvas {
@@ -42,7 +68,9 @@
 </head>
 <body>
     <div id="intro"></div>
-    <div id="world"></div> <!-- Container for the 3D world -->
+    <div id="world"></div>
+    <div id="title">ANNA'S ISLAND</div>
+    <div id="footer">buon compleanno, maus</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
@@ -50,14 +78,16 @@
     <script>
         const intro = document.getElementById('intro');
         const worldContainer = document.getElementById('world');
+        const title = document.getElementById('title');
+        const footer = document.getElementById('footer');
 
         // Introductory text
         const texts = [
-            { content: "Hey", pause: 2000 }, // 2-second pause after "Hey"
-            { content: "Do you remember how you once told me,", pause: 4000 }, // 4-second pause
-            { content: "how much you like the idea behind Rose Island?", pause: 4000 }, // 4-second pause
-            { content: "Well,", pause: 2000 }, // 2-second pause after "Well"
-            { content: "here's one for you.", pause: 2000 } // 2-second pause
+            { content: "Hey", pause: 2000 },
+            { content: "Do you remember how you once told me,", pause: 4000 },
+            { content: "how much you like the idea behind Rose Island?", pause: 4000 },
+            { content: "Well,", pause: 2000 },
+            { content: "here's one for you.", pause: 2000 }
         ];
 
         let currentTextIndex = 0;
@@ -66,58 +96,53 @@
         function displayText() {
             const currentText = texts[currentTextIndex];
 
-            // Display the current text
             intro.textContent = currentText.content;
-            intro.style.opacity = 1; // Fade in the text
+            intro.style.opacity = 1;
 
-            // Wait for the pause, then fade out and move to the next text
             setTimeout(() => {
-                intro.style.opacity = 0; // Fade out the text
+                intro.style.opacity = 0;
                 setTimeout(() => {
                     currentTextIndex++;
 
                     if (currentTextIndex < texts.length) {
-                        // Display the next text
                         displayText();
                     } else {
-                        // Load the 3D world after all texts
                         loadWorld();
                     }
-                }, 1500); // Wait 1.5 seconds for fade-out transition
+                }, 1500);
             }, currentText.pause);
         }
 
         function loadWorld() {
-            // Fade in the world container
+            intro.style.display = "none";
             worldContainer.style.opacity = 1;
 
-            // Scene setup
+            title.style.display = "block";
+            footer.style.display = "block";
+
             const scene = new THREE.Scene();
 
-            // Camera and renderer setup
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 30, 100); // Start farther away
+            camera.position.set(0, 30, 100);
+
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             worldContainer.appendChild(renderer.domElement);
 
-            // OrbitControls setup
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.minPolarAngle = (5 * Math.PI) / 180; // Minimum angle: 5 degrees
-            controls.maxPolarAngle = Math.PI / 2; // Maximum angle: 90 degrees
-            controls.minDistance = 10; // Minimum zoom distance
-            controls.maxDistance = 80; // Maximum zoom distance
-            controls.enableDamping = true; // Enable damping for smooth controls
+            controls.minPolarAngle = (5 * Math.PI) / 180;
+            controls.maxPolarAngle = Math.PI / 2;
+            controls.minDistance = 10;
+            controls.maxDistance = 80;
+            controls.enableDamping = true;
 
-            // Lighting setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Reduced intensity
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4); // Reduced intensity
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            // Gradient background
             const vertexShader = `
                 varying vec2 vUv;
                 void main() {
@@ -130,8 +155,8 @@
                 varying vec2 vUv;
 
                 void main() {
-                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5); // Night to Light Coral
-                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5); // Night to Sky Blue
+                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
+                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
                     gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
                 }
             `;
@@ -140,7 +165,7 @@
                 vertexShader: vertexShader,
                 fragmentShader: fragmentShader,
                 uniforms: {
-                    time: { value: 0 } // Pass time as a uniform
+                    time: { value: 0 }
                 },
                 side: THREE.BackSide
             });
@@ -149,7 +174,6 @@
             const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
             scene.add(gradientMesh);
 
-            // Water texture setup
             const textureLoader = new THREE.TextureLoader();
             const waterTexture = textureLoader.load('sea_1.png');
             waterTexture.wrapS = THREE.RepeatWrapping;
@@ -159,9 +183,8 @@
             const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
             const waterGeometry = new THREE.PlaneGeometry(100, 100);
 
-            // Create a tiled water surface
             const tileSize = 100;
-            const tiles = 5; // Number of tiles in one direction
+            const tiles = 7; // Increase the number of tiles for larger water
             for (let x = -tiles / 2; x < tiles / 2; x++) {
                 for (let z = -tiles / 2; z < tiles / 2; z++) {
                     const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -171,28 +194,26 @@
                 }
             }
 
-            // Move water texture slowly
             let waterOffset = 0;
             function moveWater() {
-                waterOffset += 0.001; // Slow speed
+                waterOffset += 0.001;
                 waterTexture.offset.y = waterOffset;
             }
 
-            // Load the GLTF model and adjust its material
             const loader = new THREE.GLTFLoader();
             loader.load(
                 './result.gltf',
                 (gltf) => {
                     const model = gltf.scene;
                     model.position.set(0, 0, 0);
-                    model.rotation.x = (3 * Math.PI) / 2; // Rotate around the X-axis
-                    model.rotation.z = Math.PI; // Adjust rotation
-                    model.scale.set(0.5, 0.5, 0.5); // Scale down by 2
+                    model.rotation.x = (3 * Math.PI) / 2;
+                    model.rotation.z = Math.PI;
+                    model.scale.set(0.5, 0.5, 0.5);
                     model.traverse((child) => {
                         if (child.isMesh) {
-                            child.material.color.set(0xCACBCB); // Set gray color (#CACBCB)
-                            child.material.roughness = 0.8; // Make less reflective
-                            child.material.metalness = 0.1; // Reduce metallic appearance
+                            child.material.color.set(0xCACBCB);
+                            child.material.roughness = 0.8;
+                            child.material.metalness = 0.1;
                         }
                     });
                     scene.add(model);
@@ -201,17 +222,15 @@
                 (error) => console.error('An error occurred while loading the model:', error)
             );
 
-            // Animate camera movement
             const initialPosition = { distance: 100, angle: 30 * (Math.PI / 180) };
-            const targetPosition = { distance: 15, angle: 15 * (Math.PI / 180) };
+            const targetPosition = { distance: 20, angle: 15 * (Math.PI / 180) };
             let animationProgress = 0;
 
             function animate() {
                 requestAnimationFrame(animate);
 
-                // Smooth camera movement
                 if (animationProgress < 1) {
-                    animationProgress += 0.01; // Slower speed
+                    animationProgress += 0.01;
                     const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
                     const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
 
@@ -222,31 +241,11 @@
                 }
 
                 controls.update();
-                moveWater(); // Ensure water moves
-                gradientMaterial.uniforms.time.value += 0.01; // Update gradient animation
+                moveWater();
+                gradientMaterial.uniforms.time.value += 0.01;
                 renderer.render(scene, camera);
             }
             animate();
 
-            // Resize handler
             window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-
-        // Skip intro on three clicks
-        document.body.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount >= 3) {
-                intro.style.display = "none";
-                loadWorld();
-            }
-        });
-
-        // Start the intro sequence
-        setTimeout(displayText, 1000); // Start after a 1-second delay
-    </script>
-</body>
-</html>
+                camera.aspect =
