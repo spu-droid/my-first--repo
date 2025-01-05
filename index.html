@@ -22,7 +22,7 @@
             font-size: calc(14px + 1.2vw);
             text-align: center;
             opacity: 0;
-            transition: opacity 3s ease-in-out; /* Fade in over 3 seconds */
+            transition: opacity 1s ease-in-out;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -63,7 +63,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 3s ease-in; /* Updated fade-in duration */
+            transition: opacity 3s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
         }
 
@@ -79,28 +79,8 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 3s ease-in; /* Updated fade-in duration */
+            transition: opacity 3s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
-        }
-
-        #song-links {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: calc(14px + 1.2vw);
-            color: rgba(255, 255, 255, 0.6);
-            display: none;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-        }
-
-        #song-links a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            display: block; /* Stack links vertically */
-            margin-bottom: 10px; /* Adjust space between links */
         }
 
         canvas {
@@ -113,28 +93,16 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v13</div> <!-- Updated version number -->
-    <div id="song-links">
-        <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
-        <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
-        <a href="https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl" target="_blank">Julge laul</a>
-    </div>
+    <div id="version">v12</div> <!-- Updated version number -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
     <script>
         const intro = document.getElementById('intro');
         const worldContainer = document.getElementById('world');
         const title = document.getElementById('title');
         const footer = document.getElementById('footer');
         const version = document.getElementById('version');
-        const songLinks = document.getElementById('song-links');
-
-        const showVersionNumber = true;
-        if (!showVersionNumber) {
-            version.style.display = 'none';
-        }
 
         const texts = [
             { content: "Hey,", pause: 2000 },
@@ -145,8 +113,6 @@
         ];
 
         let currentTextIndex = 0;
-        let clickCount = 0;
-        let underwaterMode = false;
 
         function displayText() {
             const currentText = texts[currentTextIndex];
@@ -155,10 +121,6 @@
 
             setTimeout(() => {
                 intro.style.opacity = 0;
-                if (showVersionNumber) {
-                    version.style.opacity = 0;
-                }
-
                 setTimeout(() => {
                     currentTextIndex++;
                     if (currentTextIndex < texts.length) {
@@ -196,22 +158,8 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                './result.gltf',
-                (gltf) => {
-                    const model = gltf.scene;
-                    model.position.set(0, 0, 0);
-                    model.rotation.x = (3 * Math.PI) / 2;
-                    model.rotation.z = Math.PI;
-                    model.scale.set(0.5, 0.5, 0.5);
-                    scene.add(model);
-                },
-                undefined,
-                (error) => console.error('An error occurred while loading the model:', error)
-            );
-
             let animationProgress = 0;
+            let fadeInTriggered = false;
 
             function animate() {
                 requestAnimationFrame(animate);
@@ -226,13 +174,16 @@
                     camera.position.y = currentDistance * Math.sin(currentAngle);
                     camera.lookAt(0, 0, 0);
 
-                    if (animationProgress >= 1) {
+                    if (animationProgress >= 1 && !fadeInTriggered) {
+                        fadeInTriggered = true;
+
                         title.style.display = "block";
                         footer.style.display = "block";
+
                         setTimeout(() => {
-                            title.style.opacity = 1;
-                            footer.style.opacity = 1;
-                        }, 10); // Fade in title and footer
+                            title.style.opacity = 1; // Fade in title
+                            footer.style.opacity = 1; // Fade in footer
+                        }, 10); // Delay to ensure visibility
                     }
                 }
 
