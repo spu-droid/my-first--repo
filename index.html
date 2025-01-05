@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,6 +25,16 @@
             position: absolute; /* Ensure it's positioned in the center */
         }
 
+        #world {
+            opacity: 0; /* Start fully transparent */
+            transition: opacity 2s ease-in-out; /* Smooth fade-in */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         canvas {
             display: block;
         }
@@ -33,18 +42,20 @@
 </head>
 <body>
     <div id="intro"></div>
+    <div id="world"></div> <!-- Container for the 3D world -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
     <script>
         const intro = document.getElementById('intro');
+        const worldContainer = document.getElementById('world');
 
         // Introductory text
         const texts = [
             { content: "Hey", pause: 2000 }, // 2-second pause after "Hey"
-            { content: "Do you remember how you once told me,", pause: 3000 }, // 4-second pause
-			{ content: "how much you like the idea behind Rose Island?", pause: 3000 }, // 4-second pause
+            { content: "Do you remember how you once told me,", pause: 4000 }, // 4-second pause
+            { content: "how much you like the idea behind Rose Island?", pause: 4000 }, // 4-second pause
             { content: "Well,", pause: 2000 }, // 2-second pause after "Well"
             { content: "here's one for you.", pause: 2000 } // 2-second pause
         ];
@@ -76,8 +87,8 @@
         }
 
         function loadWorld() {
-            // Clear the intro element
-            intro.style.display = "none";
+            // Fade in the world container
+            worldContainer.style.opacity = 1;
 
             // Scene setup
             const scene = new THREE.Scene();
@@ -88,7 +99,7 @@
 
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+            worldContainer.appendChild(renderer.domElement);
 
             // OrbitControls setup
             const controls = new THREE.OrbitControls(camera, renderer.domElement);
