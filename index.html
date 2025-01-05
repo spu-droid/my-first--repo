@@ -63,7 +63,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 5s ease-in-out;
+            transition: opacity 2s ease-in-out; /* Updated to 2 seconds */
             user-select: none; /* Prevent text selection */
         }
 
@@ -79,26 +79,25 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 5s ease-in-out;
+            transition: opacity 2s ease-in-out; /* Updated to 2 seconds */
             user-select: none; /* Prevent text selection */
         }
 
-        #song-links {
+        #links-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            font-size: calc(14px + 1.2vw);
-            color: rgba(255, 255, 255, 0.6);
             display: none;
         }
 
-        #song-links a {
+        .song-link {
+            font-size: calc(13px + 1vw); /* Reduced font size */
             color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            margin: 20px 0; /* Updated spacing to 40px total (20px above + below) */
             text-decoration: none;
-            display: block; /* Stack links vertically */
-            margin-bottom: 40px; /* Adjust space between links */
         }
 
         canvas {
@@ -111,11 +110,11 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v9</div> <!-- Version number -->
-    <div id="song-links">
-        <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
-        <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
-        <a href="https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl" target="_blank">Julge laul</a>
+    <div id="version">v7</div> <!-- Version number -->
+    <div id="links-container">
+        <a class="song-link" onclick="window.open('https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR', '_blank')">Primavera in anticipo</a>
+        <a class="song-link" onclick="window.open('https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1', '_blank')">Toute la pluie tombe sur moi</a>
+        <a class="song-link" onclick="window.open('https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl', '_blank')">Julge laul</a>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -127,7 +126,7 @@
         const title = document.getElementById('title');
         const footer = document.getElementById('footer');
         const version = document.getElementById('version');
-        const songLinks = document.getElementById('song-links');
+        const linksContainer = document.getElementById('links-container');
 
         const showVersionNumber = true;
         if (!showVersionNumber) {
@@ -144,7 +143,6 @@
 
         let currentTextIndex = 0;
         let clickCount = 0;
-        let underwaterMode = false;
 
         function displayText() {
             const currentText = texts[currentTextIndex];
@@ -174,7 +172,8 @@
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 30, 100);
+            const homePosition = { x: 0, y: 30, z: 100 }; // Home position for reset
+            camera.position.set(homePosition.x, homePosition.y, homePosition.z);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -194,120 +193,22 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            const vertexShader = 
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            ;
-            const fragmentShader = 
-                uniform float time;
-                varying vec2 vUv;
-
-                void main() {
-                    vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
-                    vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
-                    gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
-                }
-            ;
-
-            const gradientMaterial = new THREE.ShaderMaterial({
-                vertexShader: vertexShader,
-                fragmentShader: fragmentShader,
-                uniforms: { time: { value: 0 } },
-                side: THREE.BackSide
-            });
-
-            const gradientGeometry = new THREE.SphereGeometry(500, 32, 32);
-            const gradientMesh = new THREE.Mesh(gradientGeometry, gradientMaterial);
-            scene.add(gradientMesh);
-
-            const textureLoader = new THREE.TextureLoader();
-            const waterTexture = textureLoader.load('sea_1.png');
-            waterTexture.wrapS = THREE.RepeatWrapping;
-            waterTexture.wrapT = THREE.RepeatWrapping;
-            waterTexture.repeat.set(10, 10);
-
-            const waterMaterial = new THREE.MeshBasicMaterial({ map: waterTexture });
-            const waterGeometry = new THREE.PlaneGeometry(100, 100);
-            const tileSize = 100;
-            const tiles = 7;
-
-            for (let x = -tiles / 2; x < tiles / 2; x++) {
-                for (let z = -tiles / 2; z < tiles / 2; z++) {
-                    const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
-                    waterTile.position.set(x * tileSize, 0, z * tileSize);
-                    waterTile.rotation.x = -Math.PI / 2;
-                    scene.add(waterTile);
-                }
-            }
-
-            let waterOffset = 0;
-            function moveWater() {
-                waterOffset += 0.001;
-                waterTexture.offset.y = waterOffset;
-            }
-
             const loader = new THREE.GLTFLoader();
             loader.load(
                 './result.gltf',
                 (gltf) => {
                     const model = gltf.scene;
                     model.position.set(0, 0, 0);
-                    model.rotation.x = (3 * Math.PI) / 2;
-                    model.rotation.z = Math.PI;
                     model.scale.set(0.5, 0.5, 0.5);
-                    model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.material.color.set(0xCACBCB);
-                            child.material.roughness = 0.8;
-                            child.material.metalness = 0.1;
-                        }
-                    });
                     scene.add(model);
                 },
                 undefined,
                 (error) => console.error('An error occurred while loading the model:', error)
             );
 
-            let animationProgress = 0;
-
             function animate() {
                 requestAnimationFrame(animate);
-
-                if (!underwaterMode) {
-                    if (animationProgress < 1) {
-                        animationProgress += 0.0054; // 1.25x slower
-                        const currentDistance = THREE.MathUtils.lerp(100, 20, animationProgress);
-                        const currentAngle = THREE.MathUtils.lerp(30 * (Math.PI / 180), 15 * (Math.PI / 180), animationProgress);
-
-                        camera.position.x = currentDistance * Math.sin(currentAngle);
-                        camera.position.z = currentDistance * Math.cos(currentAngle);
-                        camera.position.y = currentDistance * Math.sin(currentAngle);
-                        camera.lookAt(0, 0, 0);
-
-                        if (animationProgress >= 1) {
-                            title.style.display = "block";
-                            footer.style.display = "block";
-                            title.style.opacity = 1;
-                            footer.style.opacity = 1;
-                        }
-                    }
-
-                    if (camera.position.y < 0) {
-                        underwaterMode = true;
-                        songLinks.style.display = "block";
-                    }
-                } else {
-                    camera.position.set(0, -10, 30);
-                    camera.lookAt(0, 0, 0);
-                    songLinks.style.display = "block";
-                }
-
                 controls.update();
-                moveWater();
-                gradientMaterial.uniforms.time.value += 0.01;
                 renderer.render(scene, camera);
             }
 
@@ -316,14 +217,11 @@
             document.body.addEventListener('click', () => {
                 clickCount++;
                 if (clickCount >= 3) {
-                    underwaterMode = false;
-                    songLinks.style.display = "none";
-                    camera.position.set(0, 30, 100);
-                    camera.lookAt(0, 0, 0); // Reset the camera angle
-                    controls.reset(); // Reset the controls
-                    title.style.display = "none";
-                    footer.style.display = "none";
-                    animationProgress = 1; // Ensure no further animation
+                    camera.position.set(homePosition.x, homePosition.y, homePosition.z);
+                    camera.lookAt(0, 0, 0);
+                    title.style.opacity = 1;
+                    footer.style.opacity = 1;
+                    clickCount = 0; // Reset clicks
                 }
             });
 
@@ -333,14 +231,6 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
         }
-
-        document.body.addEventListener('click', () => {
-            clickCount++;
-            if (clickCount >= 3) {
-                intro.style.display = "none";
-                loadWorld();
-            }
-        });
 
         setTimeout(displayText, 1000);
     </script>
