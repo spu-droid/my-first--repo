@@ -21,7 +21,7 @@
             font-size: calc(16px + 0.8vw);
             text-align: center;
             opacity: 0;
-            transition: opacity 1s ease-in-out;
+            transition: opacity 1s ease-in-out; /* Smooth fade in/out */
             position: absolute; /* Ensure it's positioned in the center */
         }
     </style>
@@ -35,48 +35,35 @@
         // Introductory text
         const texts = [
             { content: "Hey", pause: 2000 }, // 2-second pause after "Hey"
-            { content: "do you remember how you once told me how much you like the idea behind Rose Island?", pause: 1000 }, // Normal pause
+            { content: "Do you remember how you once told me how much you like the idea behind Rose Island?", pause: 2000 }, // 2-second pause
             { content: "Well", pause: 2000 }, // 2-second pause after "Well"
-            { content: "here's one for you.", pause: 1000 } // Normal pause
+            { content: "Here's one for you.", pause: 2000 } // 2-second pause
         ];
 
         let currentTextIndex = 0;
-        let currentWordIndex = 0;
 
-        function typeText() {
+        function displayText() {
             const currentText = texts[currentTextIndex];
 
-            if (currentWordIndex === 0) {
-                intro.textContent = ""; // Clear the intro text for the new phrase
-                intro.style.opacity = 1; // Fade in the text
-            }
+            // Display the current text
+            intro.textContent = currentText.content;
+            intro.style.opacity = 1; // Fade in the text
 
-            const words = currentText.content.split(" ");
-            if (currentWordIndex < words.length) {
-                // Add the next word with a space
-                intro.textContent += (currentWordIndex === 0 ? "" : " ") + words[currentWordIndex];
-                currentWordIndex++;
-
-                // Adjust typing speed here (faster typing speed)
-                setTimeout(typeText, 200); // Word appears every 200ms
-            } else {
-                // All words typed, wait for the pause before fading out or continuing
+            // Wait for the pause, then fade out and move to the next text
+            setTimeout(() => {
+                intro.style.opacity = 0; // Fade out the text
                 setTimeout(() => {
-                    intro.style.opacity = 0; // Fade out the text
-                    setTimeout(() => {
-                        currentTextIndex++;
-                        currentWordIndex = 0;
+                    currentTextIndex++;
 
-                        if (currentTextIndex < texts.length) {
-                            // Move to the next text
-                            typeText();
-                        } else {
-                            // Load the world after all intro texts are done
-                            loadWorld();
-                        }
-                    }, 1000); // Wait 1 second for fade-out transition
-                }, currentText.pause);
-            }
+                    if (currentTextIndex < texts.length) {
+                        // Display the next text
+                        displayText();
+                    } else {
+                        // Load the 3D world after all texts
+                        loadWorld();
+                    }
+                }, 1000); // Wait 1 second for fade-out transition
+            }, currentText.pause);
         }
 
         function loadWorld() {
@@ -90,7 +77,7 @@
         }
 
         // Start the intro sequence
-        setTimeout(typeText, 1000); // Start after a 1-second delay
+        setTimeout(displayText, 1000); // Start after a 1-second delay
     </script>
 </body>
 </html>
