@@ -248,4 +248,21 @@
             animate();
 
             window.addEventListener('resize', () => {
-                camera.aspect =
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        document.body.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount >= 3) {
+                intro.style.display = "none";
+                loadWorld();
+            }
+        });
+
+        setTimeout(displayText, 1000);
+    </script>
+</body>
+</html>
