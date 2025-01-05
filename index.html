@@ -276,47 +276,55 @@
 
             let animationProgress = 0;
 
-            function animate() {
-                requestAnimationFrame(animate);
+			function animate() {
+				requestAnimationFrame(animate);
 
-                if (!underwaterMode) {
-                    if (animationProgress < 1) {
-                        animationProgress += 0.0054; // 1.25x slower
-                        const currentDistance = THREE.MathUtils.lerp(100, 20, animationProgress);
-                        const currentAngle = THREE.MathUtils.lerp(30 * (Math.PI / 180), 15 * (Math.PI / 180), animationProgress);
+				// Check if underwater
+				if (camera.position.y < 0) {
+					if (!underwaterMode) {
+						// Enter underwater mode
+						underwaterMode = true;
+						linksVisible = true;
+						songLinks.style.display = "block";
+						setTimeout(() => (songLinks.style.opacity = 1), 10); // Fade in links
+					}
+				} else {
+					if (underwaterMode) {
+						// Exit underwater mode
+						underwaterMode = false;
+						linksVisible = false;
+						songLinks.style.opacity = 0; // Fade out links
+						setTimeout(() => (songLinks.style.display = "none"), 1000);
+					}
+				}
 
-                        camera.position.x = currentDistance * Math.sin(currentAngle);
-                        camera.position.z = currentDistance * Math.cos(currentAngle);
-                        camera.position.y = currentDistance * Math.sin(currentAngle);
-                        camera.lookAt(0, 0, 0);
+				// Animation logic
+				if (!underwaterMode) {
+					if (animationProgress < 1) {
+						animationProgress += 0.0054; // 1.25x slower
+						const currentDistance = THREE.MathUtils.lerp(100, 20, animationProgress);
+						const currentAngle = THREE.MathUtils.lerp(30 * (Math.PI / 180), 15 * (Math.PI / 180), animationProgress);
 
-                        if (animationProgress >= 1) {
-                            title.style.display = "block";
-                            footer.style.display = "block";
-                            title.style.opacity = 1;
-                            footer.style.opacity = 1;
-                        }
-                    }
+						camera.position.x = currentDistance * Math.sin(currentAngle);
+						camera.position.z = currentDistance * Math.cos(currentAngle);
+						camera.position.y = currentDistance * Math.sin(currentAngle);
+						camera.lookAt(0, 0, 0);
 
-                    if (camera.position.y < 0 && !linksVisible) {
-                        underwaterMode = true;
-                        linksVisible = true;
-                        songLinks.style.display = "block";
-                        setTimeout(() => (songLinks.style.opacity = 1), 10);
-                    }
-                } else {
-                    if (camera.position.y >= 0 && linksVisible) {
-                        linksVisible = false;
-                        songLinks.style.opacity = 0;
-                        setTimeout(() => (songLinks.style.display = "none"), 1000);
-                    }
-                }
+						if (animationProgress >= 1) {
+							title.style.display = "block";
+							footer.style.display = "block";
+							title.style.opacity = 1;
+							footer.style.opacity = 1;
+						}
+					}
+				}
 
-                controls.update();
-                moveWater();
-                gradientMaterial.uniforms.time.value += 0.01;
-                renderer.render(scene, camera);
-            }
+				controls.update();
+				moveWater();
+				gradientMaterial.uniforms.time.value += 0.01;
+				renderer.render(scene, camera);
+			}
+
 
             animate();
 
