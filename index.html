@@ -63,7 +63,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 2s ease-in-out; /* 2-second fade-in effect */
+            transition: opacity 5s ease-in-out;
             user-select: none; /* Prevent text selection */
         }
 
@@ -79,7 +79,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 2s ease-in-out; /* 2-second fade-in effect */
+            transition: opacity 5s ease-in-out;
             user-select: none; /* Prevent text selection */
         }
 
@@ -92,6 +92,8 @@
             font-size: calc(14px + 1.2vw);
             color: rgba(255, 255, 255, 0.6);
             display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
 
         #song-links a {
@@ -111,7 +113,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v6</div> <!-- Version number -->
+    <div id="version">v6</div> <!-- Updated version number -->
     <div id="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
@@ -194,10 +196,17 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
             const fragmentShader = `
                 uniform float time;
                 varying vec2 vUv;
+
                 void main() {
                     vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
                     vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
@@ -281,24 +290,28 @@
                         camera.lookAt(0, 0, 0);
 
                         if (animationProgress >= 1) {
-                            // Trigger fade-in of the upper and lower texts
                             title.style.display = "block";
                             footer.style.display = "block";
-                            setTimeout(() => {
-                                title.style.opacity = 1;
-                                footer.style.opacity = 1;
-                            }, 100); // Ensure fade-in effect
+                            title.style.opacity = 1;
+                            footer.style.opacity = 1;
                         }
                     }
 
                     if (camera.position.y < 0) {
                         underwaterMode = true;
                         songLinks.style.display = "block";
+                        songLinks.style.opacity = 1; // Fade in links
                     }
                 } else {
-                    camera.position.set(0, -10, 30);
-                    camera.lookAt(0, 0, 0);
-                    songLinks.style.display = "block";
+                    if (camera.position.y >= 0) {
+                        underwaterMode = false;
+                        songLinks.style.opacity = 0; // Fade out links
+                        setTimeout(() => {
+                            if (!underwaterMode) {
+                                songLinks.style.display = "none";
+                            }
+                        }, 1000); // Delay hiding the links until fade out is complete
+                    }
                 }
 
                 controls.update();
@@ -314,6 +327,7 @@
                 if (clickCount >= 3) {
                     underwaterMode = false;
                     songLinks.style.display = "none";
+                    songLinks.style.opacity = 0;
                     animationProgress = 1;
                     camera.position.set(0, 30, 100);
                     controls.reset();
