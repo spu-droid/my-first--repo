@@ -61,9 +61,8 @@
             font-family: 'Didot', serif;
             z-index: 1000;
             text-align: center;
-            display: none;
             opacity: 0;
-            transition: opacity 3s ease-in-out; /* Fade-in duration */
+            transition: opacity 1s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
         }
 
@@ -77,9 +76,8 @@
             font-family: 'Didot', serif;
             z-index: 1000;
             text-align: center;
-            display: none;
             opacity: 0;
-            transition: opacity 3s ease-in-out; /* Fade-in duration */
+            transition: opacity 1s ease-in-out; /* Fade-in duration */
             user-select: none; /* Prevent text selection */
         }
 
@@ -110,7 +108,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v5</div> <!-- Version number -->
+    <div id="version">v6</div> <!-- Version number incremented -->
     <div class="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank" class="song-link">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank" class="song-link">Toute la pluie tombe sur moi</a>
@@ -287,10 +285,8 @@
                         camera.lookAt(0, 0, 0);
 
                         if (animationProgress >= 1) {
-                            title.style.display = "block";
-                            footer.style.display = "block";
-                            title.style.opacity = 1;
-                            footer.style.opacity = 1;
+                            title.style.opacity = 1; // Fade in
+                            footer.style.opacity = 1; // Fade in
                         }
                     }
 
@@ -330,6 +326,16 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
             });
+
+            function handleUnderwater() {
+                if (camera.position.y >= 0) {
+                    songLinks.style.display = "none";
+                } else {
+                    songLinks.style.display = "block";
+                }
+            }
+
+            setInterval(handleUnderwater, 100); // Check underwater state periodically
         }
 
         document.body.addEventListener('click', () => {
