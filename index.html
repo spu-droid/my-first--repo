@@ -63,7 +63,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 5s ease-in-out;
+            transition: opacity 2s ease-in-out; /* 2-second fade-in effect */
             user-select: none; /* Prevent text selection */
         }
 
@@ -79,7 +79,7 @@
             text-align: center;
             display: none;
             opacity: 0;
-            transition: opacity 5s ease-in-out;
+            transition: opacity 2s ease-in-out; /* 2-second fade-in effect */
             user-select: none; /* Prevent text selection */
         }
 
@@ -111,7 +111,7 @@
     <div id="world"></div>
     <div id="title">ANNA'S ISLAND</div>
     <div id="footer">buon compleanno, maus</div>
-    <div id="version">v5</div> <!-- Version number -->
+    <div id="version">v6</div> <!-- Version number -->
     <div id="song-links">
         <a href="https://open.spotify.com/track/0nPwxIuzo56f5Hz8XqQGuR" target="_blank">Primavera in anticipo</a>
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
@@ -194,17 +194,10 @@
             directionalLight.position.set(5, 10, 5);
             scene.add(directionalLight);
 
-            const vertexShader = `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `;
+            const vertexShader = `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
             const fragmentShader = `
                 uniform float time;
                 varying vec2 vUv;
-
                 void main() {
                     vec3 color1 = mix(vec3(0.0, 0.0, 0.5), vec3(0.94, 0.5, 0.5), sin(time * 0.2) * 0.5 + 0.5);
                     vec3 color2 = mix(vec3(0.0, 0.0, 0.3), vec3(0.53, 0.81, 0.92), cos(time * 0.2) * 0.5 + 0.5);
@@ -288,10 +281,13 @@
                         camera.lookAt(0, 0, 0);
 
                         if (animationProgress >= 1) {
+                            // Trigger fade-in of the upper and lower texts
                             title.style.display = "block";
                             footer.style.display = "block";
-                            title.style.opacity = 1;
-                            footer.style.opacity = 1;
+                            setTimeout(() => {
+                                title.style.opacity = 1;
+                                footer.style.opacity = 1;
+                            }, 100); // Ensure fade-in effect
                         }
                     }
 
