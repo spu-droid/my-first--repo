@@ -18,7 +18,7 @@
         }
 
         #intro {
-            font-size: calc(16px + 0.8vw);
+            font-size: calc(16px + 2vw);
             text-align: center;
             opacity: 0;
             transition: opacity 1s ease-in-out;
@@ -27,7 +27,7 @@
 
         #world {
             opacity: 0;
-            transition: opacity 4s ease-in-out; /* Slower fade-in */
+            transition: opacity 4s ease-in-out;
             position: absolute;
             top: 0;
             left: 0;
@@ -40,12 +40,14 @@
             top: 5%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: calc(20px + 1vw);
+            font-size: calc(20px + 2vw);
             color: orange;
             font-family: 'Didot', serif;
             z-index: 1000;
             text-align: center;
             display: none;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
         }
 
         #footer {
@@ -53,12 +55,14 @@
             bottom: 5%;
             left: 50%;
             transform: translateX(-50%);
-            font-size: calc(14px + 0.8vw);
+            font-size: calc(14px + 1.5vw);
             color: rgba(255, 255, 255, 0.5);
             font-family: 'Didot', serif;
             z-index: 1000;
             text-align: center;
             display: none;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
         }
 
         canvas {
@@ -116,9 +120,6 @@
         function loadWorld() {
             intro.style.display = "none";
             worldContainer.style.opacity = 1;
-
-            title.style.display = "block";
-            footer.style.display = "block";
 
             const scene = new THREE.Scene();
 
@@ -184,7 +185,7 @@
             const waterGeometry = new THREE.PlaneGeometry(100, 100);
 
             const tileSize = 100;
-            const tiles = 7; // Increase the number of tiles for larger water
+            const tiles = 7;
             for (let x = -tiles / 2; x < tiles / 2; x++) {
                 for (let z = -tiles / 2; z < tiles / 2; z++) {
                     const waterTile = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -230,7 +231,7 @@
                 requestAnimationFrame(animate);
 
                 if (animationProgress < 1) {
-                    animationProgress += 0.01;
+                    animationProgress += 0.005; // Slow camera movement
                     const currentDistance = THREE.MathUtils.lerp(initialPosition.distance, targetPosition.distance, animationProgress);
                     const currentAngle = THREE.MathUtils.lerp(initialPosition.angle, targetPosition.angle, animationProgress);
 
@@ -238,6 +239,13 @@
                     camera.position.z = currentDistance * Math.cos(currentAngle);
                     camera.position.y = currentDistance * Math.sin(currentAngle);
                     camera.lookAt(0, 0, 0);
+
+                    if (animationProgress >= 1) {
+                        title.style.display = "block";
+                        footer.style.display = "block";
+                        title.style.opacity = 1;
+                        footer.style.opacity = 1;
+                    }
                 }
 
                 controls.update();
