@@ -103,15 +103,16 @@
             margin-bottom: 10px; /* Adjust space between links */
         }
 
-        #coordinates {
+        #coordinates-bar {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: black;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 5px 10px;
-            border-radius: 5px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            padding: 5px 0;
             z-index: 1000;
         }
 
@@ -131,7 +132,7 @@
         <a href="https://open.spotify.com/track/199J8Nvx5oDmOKwAhtt9f1" target="_blank">Toute la pluie tombe sur moi</a>
         <a href="https://open.spotify.com/track/5pWuc7b466Qwm6QpI16fDl" target="_blank">Julge laul</a>
     </div>
-    <div id="coordinates">Coordinates: X: 0, Y: 0, Z: 0</div>
+    <div id="coordinates-bar">Looking at: X: 0, Y: 0, Z: 0</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
@@ -143,12 +144,14 @@
         const footer = document.getElementById('footer');
         const version = document.getElementById('version');
         const songLinks = document.getElementById('song-links');
-        const coordinatesDisplay = document.getElementById('coordinates');
+        const coordinatesBar = document.getElementById('coordinates-bar');
 
         const showVersionNumber = true;
         if (!showVersionNumber) {
             version.style.display = 'none';
         }
+
+        let cameraLookAt = new THREE.Vector3(0, 0, 0);
 
         const texts = [
             { content: "Hey,", pause: 2000 },
@@ -232,8 +235,8 @@
             }
 
             function updateCoordinates() {
-                const { x, y, z } = camera.position;
-                coordinatesDisplay.textContent = `Coordinates: X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}`;
+                camera.getWorldDirection(cameraLookAt);
+                coordinatesBar.textContent = `Looking at: X: ${cameraLookAt.x.toFixed(2)}, Y: ${cameraLookAt.y.toFixed(2)}, Z: ${cameraLookAt.z.toFixed(2)}`;
             }
 
             function animate() {
